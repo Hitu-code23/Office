@@ -46,8 +46,15 @@ The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, wea
 | --- | --- |
 | `?lite=1` | Lighter build for slow devices |
 | `?fx=1` | Always use the full effects |
+| `?live=1` | Live mode: real pipeline numbers and events from the Velorien database (names hidden) |
 | `?time=17:30` | Starts the clock at that Dubai time (handy for showing a sunset) |
 | `#office=…` | Opens a branded office (made with Copy share link) |
+
+## Live mode
+
+`?live=1` switches the office from the demo to the real pipeline. Numbers, the activity feed, the meetings list and the Booking Tower come from the `velorien-office` Supabase project, refreshed every 20 seconds. New leads, emails and bookings animate in the office as they happen.
+
+The page can only read counts and anonymous labels such as "Salon · JVC" through one database function, `office_public()`. Business names, emails and phone numbers never reach the browser. The normal link (without `?live=1`) keeps showing the demo.
 
 ## Editing the Client Street shops
 

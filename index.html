@@ -626,6 +626,8 @@ const A={}, agents=AG.map((r,i)=>{
 });
 const OBJ={vault:{x:15.6,y:2},brain:{x:16,y:4.3},meet:{x:14.3,y:8.7}};
 
+/* LIVE DATA: open the page with ?live=1 to show the real pipeline from Supabase instead of the demo */
+const LIVE={url:'https://zomspykhwkyuyrvcqwaf.supabase.co',key:'sb_publishable_BVDwGw2jQyiK3w8ockp-5Q_gCd_9rOA',on:/[?&]live=1(&|$)/.test(location.search),ok:false};
 const S={found:1840,researched:1512,drafted:1340,sent:1296,replied:87,booked:14,rules:42,live:9,reach:48200,reels:31};
 const B1=['Zephyra','Orbelle','Kalinth','Vantera','Mirabay','Sundoro','Tessaro','Nimbla','Corvessa','Halvora','Quillon','Brisane','Elmwick','Feyra','Lunaro'];
 const B2=['Dental Clinic','Gents Salon','Rent A Car','Cafe','Beauty Lounge','Pet Grooming','Auto Garage','Fitness Studio','Flowers','Tailors','Nail Studio','Bakery'];
@@ -3072,7 +3074,7 @@ function paintAgents(){
     if(a.lab){a.lab.classList.toggle('wait',a.waits&&!a.paused);a.lab.classList.toggle('paused',a.paused);}
     if(a.mat)a.mat.color.setHex(a.paused?0x6A6676:0xFFFFFF);
     if(a.paused)p++;else if(a.waits)q++;else if(a.home)hm++;else w++;});
-  $('#headline').textContent='Demo. '+(speed===0?'Office paused':`${w} working`+(q?`, ${q} need you`:'')+(hm?`, ${hm} gone home`:'')+(p?`, ${p} paused`:''));
+  $('#headline').textContent=(LIVE.on?'Live. ':'Demo. ')+(speed===0?'Office paused':`${w} working`+(q?`, ${q} need you`:'')+(hm?`, ${hm} gone home`:'')+(p?`, ${p} paused`:''));
 }
 function paintBubbles(){   // a small pulsing marker over anyone who needs a decision
   agents.forEach(a=>{if(!a.lab)return;const d=decisions.find(d=>d.agent===a.id),slot=a.lab.firstChild;
@@ -3504,6 +3506,46 @@ catch(err){
     '<button class="b2" data-obj="vault">Lead Vault</button><button class="b2" data-obj="brain">Shared Brain</button><button class="b2" data-obj="meet">Meetings booked</button>';
 }
 if(G){applyNames();loadThemeImages(()=>G.retheme());const q=G.quality();document.querySelectorAll('[data-q]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.q===q)));}
+/* ---------- live mode: real numbers and real events replace the simulation ---------- */
+if(LIVE.on){
+  const LV={found:0,researched:0,drafted:0,sent:0,replied:0,booked:0};
+  Object.keys(LV).forEach(k=>Object.defineProperty(S,k,{get:()=>LV[k],set:()=>{},enumerable:true,configurable:true}));
+  S.reach=0;S.reels=0;S.live=CLIENTS.filter(c=>c.url).length;
+  const IDLE={scout:'Looking for new leads',research:'Waiting for new leads to check',writer:'Waiting for leads to write to',sender:'Outbox is empty',reply:'Watching the inbox',booker:'Waiting for replies to book',
+    design:'Working on client sites',delivery:'Looking after live client sites',marketing:'Planning this week’s posts',director:'Watching the pipeline'};
+  const KT={maps:'scout',dir:'scout',insta:'scout',audit:'research',contact:'research',score:'research',first:'writer',subject:'writer',follow:'writer',send:'sender',deliver:'sender',sort:'reply',answer:'reply',object:'reply',
+    book:'booker',remind:'booker',mock:'design',build:'design',qa:'delivery',onboard:'delivery',change:'delivery',launch:'delivery',social:'marketing',seo:'marketing',ads:'marketing',reel:'marketing',direct:'director'};
+  Object.keys(ACT).forEach(k=>{ACT[k]=()=>[IDLE[KT[k]]||'Working'];});
+  spawnDecision=function(){};forceBook=function(){};
+  leads.length=0;meetings.length=0;feed.length=0;
+  const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research'};
+  const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote an email for '+l,approved:l=>'Email approved for '+l,sent:l=>'Sent the email to '+l,replied:l=>l+' replied',
+    booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l};
+  const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found'};
+  const NEXT={scout:'research',research:'writer',writer:'sender',booker:null};
+  const who=t=>agents.find(q=>q.team===t&&!q.home&&!q.paused)||agents.find(q=>q.team===t)||A.harsh;
+  const when=iso=>{const d=new Date(new Date(iso).getTime()+4*3600e3),h=d.getUTCHours(),m=d.getUTCMinutes();return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+((h+11)%12+1)+':'+String(m).padStart(2,'0')+(h<12?' am':' pm');};
+  function show(e){const a=who(TEAM[e.kind]||'director'),msg=(TXT[e.kind]||(l=>l))(e.label);a.status=msg;a.done++;setItem(a,msg);say(a,msg,true);
+    if(G){const x=a.x+.18,y=1.25+(a.team==='marketing'?F2:0),z=a.y-.6,c=T[a.team].color,nx=NEXT[a.team]&&who(NEXT[a.team]);
+      if(e.kind==='sent'){if(G.serverBlink)G.serverBlink();G.packet(x,y,z,x+7,10,z-15,c,1.5);}
+      else if(e.kind==='replied')G.packet(x-9,10,z+13,x,y,z,c,1.5);
+      else if(nx)G.packet(x,y,z,nx.x+.18,1.25,nx.y-.6,c,1.6);}
+    if(e.kind==='booked')celebrate();paintFeed();paintNumbers();}
+  let last=null;
+  const badge=ok=>{const b=$('#demoBadge');if(b)b.textContent=ok?'Live data · names hidden':'Live data · reconnecting…';};badge(true);
+  async function poll(){if(document.hidden&&last!==null)return;
+    try{const r=await fetch(LIVE.url+'/rest/v1/rpc/office_public',{method:'POST',headers:{apikey:LIVE.key,'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw new Error(r.status);const j=await r.json();
+      Object.assign(LV,j.counts||{});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
+      const ev=(j.events||[]).slice().reverse();
+      if(last===null)ev.forEach(e=>{const a=who(TEAM[e.kind]||'director');if(TXT[e.kind])pushFeed(a,TXT[e.kind](e.label));});
+      else ev.filter(e=>e.id>last).forEach((e,i)=>setTimeout(()=>show(e),i*1800));
+      last=ev.reduce((m,e)=>Math.max(m,e.id),last||0);
+      leads.length=0;(j.events||[]).forEach(e=>{if(!leads.some(l=>l.biz===e.label))leads.push({biz:e.label,area:'',stage:STG[e.kind]||'Found'});});
+      meetings.length=0;(j.meetings||[]).forEach(m=>meetings.push({biz:m.label,when:when(m.starts_at)}));
+      badge(true);paintNumbers();paintFeed();}
+    catch(_){LIVE.ok=false;badge(false);}}
+  poll();setInterval(poll,20000);
+}
 for(let i=0;i<6;i++)tick(true);
 spawnDecision();spawnDecision();
 paintNumbers();paintFeed();paintTray();paintBubbles();

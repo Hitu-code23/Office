@@ -3508,7 +3508,7 @@ catch(err){
 if(G){applyNames();loadThemeImages(()=>G.retheme());const q=G.quality();document.querySelectorAll('[data-q]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.q===q)));}
 /* ---------- live mode: real numbers and real events replace the simulation ---------- */
 if(LIVE.on){
-  const LV={found:0,researched:0,drafted:0,sent:0,replied:0,booked:0,opened:0};let waiting=0,snooze=0;
+  const LV={found:0,researched:0,drafted:0,sent:0,replied:0,booked:0,opened:0,won:0};let waiting=0,snooze=0,REV=null;
   Object.keys(LV).forEach(k=>Object.defineProperty(S,k,{get:()=>LV[k],set:()=>{},enumerable:true,configurable:true}));
   S.reach=0;S.reels=0;S.live=CLIENTS.filter(c=>c.url).length;S.rules=0;rules.length=0;
   const IDLE={scout:'Looking for new leads',research:'Waiting for new leads to check',writer:'Waiting for leads to write to',sender:'Outbox is empty',reply:'Watching the inbox',booker:'Waiting for replies to book',
@@ -3530,16 +3530,16 @@ if(LIVE.on){
       if(e.kind==='sent'){if(G.serverBlink)G.serverBlink();G.packet(x,y,z,x+7,10,z-15,c,1.5);}
       else if(e.kind==='replied'||e.kind==='opened')G.packet(x-9,10,z+13,x,y,z,e.kind==='opened'?'#A4D8FF':c,1.5);
       else if(nx)G.packet(x,y,z,nx.x+.18,1.25,nx.y-.6,c,1.6);}
-    if(e.kind==='booked')celebrate();else if(e.kind==='opened')snd.chime();paintFeed();paintNumbers();}
+    if(e.kind==='booked'||e.kind==='won')celebrate();else if(e.kind==='opened')snd.chime();paintFeed();paintNumbers();}
   /* the Lead Vault sign also counts warm leads (opened their preview) */
-  {const pN=paintNumbers;paintNumbers=function(){pN();if(G&&LV.opened){const v=$('#t-vault');if(v)v.textContent=fmt(S.found)+' leads · '+LV.opened+' warm';}};}
+  {const pN=paintNumbers;paintNumbers=function(){pN();if(G&&(LV.opened||LV.won)){const v=$('#t-vault');if(v)v.textContent=fmt(S.found)+' leads'+(LV.won?' · '+LV.won+(LV.won===1?' client':' clients')+' won':'')+(LV.opened?' · '+LV.opened+' warm':'');}};}
   const at=iso=>{const d=new Date(new Date(iso).getTime()+4*3600e3),n=new Date(Date.now()+4*3600e3),hm=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');
     return d.toISOString().slice(0,10)===n.toISOString().slice(0,10)?hm:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+hm;};
   let last=null;
-  const badge=ok=>{const b=$('#demoBadge');if(b)b.textContent=ok?'Live data · names hidden':'Live data · reconnecting…';};badge(true);
+  const badge=ok=>{const b=$('#demoBadge');if(b){const r=REV&&REV.month>0?'AED '+fmt(Math.round(REV.month))+' won this month':'';b.textContent=!ok?'Live data · reconnecting…':r?(innerWidth<700?'Live · '+r:'Live data · names hidden · '+r):'Live data · names hidden';}};badge(true);
   async function poll(){if(document.hidden&&last!==null)return;
     try{const r=await fetch(LIVE.url+'/rest/v1/rpc/office_public',{method:'POST',headers:{apikey:LIVE.key,'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw new Error(r.status);const j=await r.json();
-      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened'].forEach(k=>{LV[k]=cn[k]||0;});S.rules=cn.rules||0;rules.length=0;(j.rules||[]).forEach(r=>{if(r&&r.text)rules.push(String(r.text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
+      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened','won'].forEach(k=>{LV[k]=cn[k]||0;});REV=j.revenue||null;S.rules=cn.rules||0;rules.length=0;(j.rules||[]).forEach(r=>{if(r&&r.text)rules.push(String(r.text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
       /* emails ready to send wait in your Gmail drafts: one card in the Needs you tray */
       waiting=cn.waiting||0;{const i=decisions.findIndex(d=>d.live);
         if(waiting>0&&Date.now()>snooze){const t=waiting+' message'+(waiting>1?'s are':' is')+' ready to send';

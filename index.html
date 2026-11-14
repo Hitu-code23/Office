@@ -3120,11 +3120,13 @@ function init3D(){
     conf.frustumCulled=false;conf.visible=false;scene.add(conf);
     const ONE=new T3.Vector3(1,1,1),CQ=new T3.Quaternion();
     let show=0,showT=0,fwNext=6,conT=99;
-    function startShow(){show=1;showT=0;fwNext=99;conT=0;conf.visible=true;blown=0;litGoal=1;dQueued=1;allCheer();
+    /* before the big moment the show is locked: it only starts when the countdown reaches zero */
+    function locked(){const l=momentAt()-Date.now();return l>0&&l<48*3600e3;}
+    function startShow(){if(locked())return false;show=1;showT=0;fwNext=99;conT=0;conf.visible=true;blown=0;litGoal=1;dQueued=1;allCheer();
       cd.forEach(c=>{c.p.set(KX+(Math.random()-.5)*16,9+Math.random()*6,KZ+(Math.random()-.5)*12);c.v.set((Math.random()-.5)*1.2,-1.4-Math.random()*1.2,(Math.random()-.5)*1.2);});
       cluster.forEach((q,i)=>{if(i%2===0){q.fly=1;q.vy=.9+Math.random()*.9;}});
       for(let k=0;k<hearts.length;k++)setTimeout(()=>spawnHeart(true),k*140);
-      }
+      return true;}
     function spawnHeart(big){const h=hearts.find(q=>q.t>=1);if(!h)return;h.t=0;h.v=big?1.4+Math.random()*.8:.9+Math.random()*.4;h.x=KX+(Math.random()-.5)*(big?3:1.2);h.z=KZ+(Math.random()-.5)*(big?3:1.2);h.ph=Math.random()*6.28;h.big=big;h.s.visible=true;}
 
     /* ================= the big moment: countdown, drone show, banner plane, heart balloon, and the office joins in ================= */
@@ -3368,7 +3370,7 @@ function init3D(){
       cdTimer-=dt;if(cdTimer<=0){cdTimer=.25;drawCountdown();const left=momentAt()-Date.now();
         if(!momentFired&&left<=0&&left>-15*60e3){momentFired=true;window.dispatchEvent(new Event('bday:moment'));}if(left>0)momentFired=false;}
     }
-    return {tick,show:startShow,pos:[KX,1.6,CZ],name:NAME};
+    return {tick,show:startShow,locked,pos:[KX,1.6,CZ],name:NAME};
   })();
 
   /* small floating rocks between the islands, some with a waterfall, and birds that fly between them */
@@ -3575,7 +3577,7 @@ function init3D(){
   function staffPos(id){const q=STAFF[id].p.g.position;return[q.x,q.z];}
   return {staffInfo,staffPos,emote,setQuality,quality:()=>QUALITY,fxOn:()=>fxOn,watch:watchSet,watchOn:()=>watch.on,watchEvent,weatherSet,occSet,weatherK:()=>wx,audioMix,retheme,focusTarget,
     life,meeting,serverBlink:()=>{srvK=1.4;},inBooth:()=>booth.on,heliState:()=>heli.s,replied:()=>{replyT=0;},carsParked:()=>carsOn,onBreak:k=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind===k).map(a=>a.name),inCafe:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='table'||a.walk.kind==='coffee')).map(a=>a.name),inRoom:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind==='meeting').map(a=>a.name),
-    setTod,todPhase,todAuto:b=>{todAuto=b;if(b)noonGoal=0;},noon:setNoon,night:()=>nightNow,drawScreens,ring,packet,confetti,cheer,ringBurst,setBeacon,snap,annex:()=>ANXS,east:()=>EST,bookBeam:()=>bookBeam(),bday:()=>BDY.show(),bdayAt:BDY.pos,bdayName:BDY.name,skipIntro:()=>{if(intro.on)endIntro();},introOn:()=>intro.on,fx:()=>fxOn};
+    setTod,todPhase,todAuto:b=>{todAuto=b;if(b)noonGoal=0;},noon:setNoon,night:()=>nightNow,drawScreens,ring,packet,confetti,cheer,ringBurst,setBeacon,snap,annex:()=>ANXS,east:()=>EST,bookBeam:()=>bookBeam(),bday:()=>BDY.show(),bdayLocked:()=>BDY.locked(),bdayAt:BDY.pos,bdayName:BDY.name,skipIntro:()=>{if(intro.on)endIntro();},introOn:()=>intro.on,fx:()=>fxOn};
 }
 function goHome(){view.tx=home.tx;view.ty=home.ty;view.tz=home.tz;view.dist=home.dist;view.pol=home.pol;}
 /* ---------- the birthday island: fly there, start the show, play the tune ---------- */
@@ -3588,12 +3590,12 @@ function bdayTune(){try{const C=window.AudioContext||window.webkitAudioContext;i
   let tb=t+.75*bt;BASS.forEach(([n0,b0])=>{play(N[n0]/4,tb,b0*bt,[[1,'triangle',.22],[2,'sine',.05]]);tb+=b0*bt;});
   S.forEach(([n0,b0])=>{const d=b0*bt;play(N[n0],t,d,[[1,'sine',.5],[2,'sine',.12],[3,'triangle',.05],[4,'sine',.025]]);t+=d;});}catch(_){}}
 function bdayGo(withTune){if(!G||!G.bday)return;if(G.watchOn())G.watch(false);if(tour>=0)tourStop(true);if(sel)dropSel();
-  const p=G.bdayAt;flyTo(p[0],SMALL?2.6:p[1],SMALL?p[2]+1.5:p[2],SMALL?52:27,SMALL?.98:1.0);{const g=SMALL?.12:.24,d=((g-view.az)%6.2832+9.4248)%6.2832-3.1416;view.az+=d;}G.bday();if(withTune)bdayTune();lastTouch=performance.now();}
+  const p=G.bdayAt;flyTo(p[0],SMALL?2.6:p[1],SMALL?p[2]+1.5:p[2],SMALL?52:27,SMALL?.98:1.0);{const g=SMALL?.12:.24,d=((g-view.az)%6.2832+9.4248)%6.2832-3.1416;view.az+=d;}const played=G.bday();if(withTune&&played)bdayTune();lastTouch=performance.now();}
 /* when the countdown on the island reaches zero, the whole show starts by itself */
 addEventListener('bday:moment',()=>bdayGo(true));
 /* a link that opens straight on the party: add #birthday to the address */
 if(/#birthday|[?&]birthday(=|&|$)/.test(location.href)){let tuned=false;const w=setInterval(()=>{if(!G)return;if(G.introOn&&G.introOn()){if(G.skipIntro)G.skipIntro();return;}clearInterval(w);setTimeout(()=>bdayGo(false),400);},300);
-  const once=()=>{if(tuned)return;tuned=true;bdayTune();};document.addEventListener('pointerdown',once,{once:true});document.addEventListener('keydown',once,{once:true});}
+  const once=()=>{if(tuned)return;tuned=true;if(!(G&&G.bdayLocked&&G.bdayLocked()))bdayTune();};document.addEventListener('pointerdown',once,{once:true});document.addEventListener('keydown',once,{once:true});}
 function flyTo(x,y,z,dist,pol){
   view.tx=x;view.ty=y;view.tz=z;view.dist=dist;view.pol=pol||1.04;
   const a=((view.az+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI; view.az+=clamp(a,-.75,.75)-a;

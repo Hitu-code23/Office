@@ -328,6 +328,15 @@ body{font-weight:400;letter-spacing:.005em}
 #demoBadge{position:absolute;z-index:3;left:12px;top:calc(68px + env(safe-area-inset-top,0px));padding:4px 10px;border-radius:999px;border:1px solid rgba(167,146,255,.5);background:rgba(12,11,17,.66);
   color:#DCD3FF;font:600 10.5px/1.3 var(--body);letter-spacing:.09em;text-transform:uppercase;pointer-events:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .intro #demoBadge{opacity:0}
+#joy{position:absolute;z-index:4;right:16px;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:rgba(12,11,17,.42);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);touch-action:none;display:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#joy::before{content:'';position:absolute;inset:31%;border-radius:50%;border:1px dashed rgba(255,255,255,.22)}
+#joy::after{content:'';position:absolute;inset:7px;border-radius:50%;background:
+  conic-gradient(from -8deg,rgba(255,255,255,.5) 0 16deg,transparent 16deg 90deg,rgba(255,255,255,.5) 90deg 106deg,transparent 106deg 180deg,rgba(255,255,255,.5) 180deg 196deg,transparent 196deg 270deg,rgba(255,255,255,.5) 270deg 286deg,transparent 286deg);
+  -webkit-mask:radial-gradient(circle,transparent 45px,#000 46px,#000 49px,transparent 50px);mask:radial-gradient(circle,transparent 45px,#000 46px,#000 49px,transparent 50px);pointer-events:none}
+#joyKnob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .18s ease-out;pointer-events:none}
+#joy.drag #joyKnob{transition:none}
+.has-touch #joy{display:block}
+.intro #joy,.photo #joy{display:none}
 @media (max-width:700px){#demoBadge{top:auto;bottom:calc(58px + env(safe-area-inset-bottom,0px));font-size:9.5px}}
 /* opening logo reveal */
 #introLogo{position:absolute;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;pointer-events:none;
@@ -408,6 +417,7 @@ body:not(.feedOn) #feedbox{display:none!important}
     </div>
   </header>
   <div id="demoBadge">Concept demo · simulated data</div>
+  <div id="joy" role="application" aria-label="Joystick: move around the islands"><div id="joyKnob"></div></div>
 
   <div id="menu" class="glass" hidden>
     <div class="mrow">
@@ -709,6 +719,7 @@ const isWater=(i,j)=>(i>=FW&&j>=3&&j<=8)||(j>=D&&i>=4&&i<=8);
 Object.assign(OBJ,{cafe:{x:3.7,y:13.6,big:1},room:{x:10.2,y:13.6,big:1},desk:{x:14.8,y:13.3,big:1},lounge:{x:28.2,y:3.2,big:1},chill:{x:28.2,y:8.4,big:1},terrace:{x:24,y:13.9,big:1},dining:{x:4.8,y:-5,big:1,up:2.6},gym:{x:12.6,y:-5,big:1,up:2.6},studio:{x:28.1,y:-5.6,big:1,up:2.6},garden:{x:6,y:21,big:1},parking:{x:24.5,y:20.7,big:1},sky:{x:28.2,y:-5.2,big:1,up:3.8},podcast:{x:29.4,y:-2.95,big:1,up:2.6},server:{x:21,y:-.2,big:1},library:{x:16.8,y:-7.7,big:1,up:2.6},kids:{x:30.05,y:3.6,big:1},lab:{x:4.9,y:-5.1,big:1,up:5.7},board:{x:13.9,y:-5.1,big:1,up:5.7},roofgarden:{x:21.6,y:-5.2,big:1,up:5.6},academy:{x:-12,y:-4,big:1,up:3.2},bridge:{x:-4,y:-6.7,big:1,up:3.2},padel:{x:-24.5,y:6,big:1},cricket:{x:-11.9,y:4.6,big:1},stage:{x:-24,y:-5.5,big:1},marina:{x:-19,y:18.5,big:1},street:{x:50,y:12.5,big:1},beach:{x:48,y:20.5,big:1},villas:{x:46.5,y:2.5,big:1},power:{x:42.4,y:-6.5,big:1,up:6},btower:{x:50.7,y:-6.9,big:1,up:7},farm:{x:57,y:-6.2,big:1},football:{x:57.6,y:2.6,big:1},shop0:{x:41.0,y:10.6,big:1},shop1:{x:44.0,y:10.6,big:1},shop2:{x:47.0,y:10.6,big:1},shop3:{x:50.0,y:10.6,big:1},shop4:{x:53.0,y:10.6,big:1},shop5:{x:56.0,y:10.6,big:1},shop6:{x:59.0,y:10.6,big:1}});
 const labs=[];
 const view={az:.62,pol:.98,dist:54,tx:15.5,ty:1,tz:7.6}, cur={}, home={};
+const JOY={x:0,y:0,on:false};
 let G=null, sel=null, speed=1, lastTouch=-1e9, hoverId=null, tour=-1, tourTeam=null, photo=false;
 /* one accent: pull the six team colours toward a soft neutral so the sunset stays the star */
 const tone=(hex,t)=>{const n=parseInt(hex.slice(1),16),g=[0x9A,0x8F,0x98];return '#'+[n>>16,(n>>8)&255,n&255].map((v,i)=>Math.round(v+(g[i]-v)*t).toString(16).padStart(2,'0')).join('');};
@@ -2828,6 +2839,9 @@ function init3D(){
     }else{
       if(tour===7&&!REDUCED)view.az+=dt*.11;
       if(watch.on){watch.t=(watch.endT-performance.now())/1000;if(watch.shot&&watch.shot.follow){const q=watch.shot.follow.position;view.tx=q.x;view.tz=q.z;}if(!REDUCED)view.az+=dt*.04;if(watch.t<=0)nextShot();}
+      if(JOY.on&&(JOY.x||JOY.y)){if(watch.on)watchSet(false);if(tour>=0&&typeof tourStop==='function')tourStop(true);
+        const sp=Math.max(8,view.dist)*.3*dt,fx=-Math.sin(view.az),fz=-Math.cos(view.az),rx=Math.cos(view.az),rz=-Math.sin(view.az);
+        view.tx=clamp(view.tx+(rx*JOY.x-fx*JOY.y)*sp,-28,58);view.tz=clamp(view.tz+(rz*JOY.x-fz*JOY.y)*sp,-11,26);cur.tx=view.tx;cur.tz=view.tz;lastTouch=performance.now();}
       const k=REDUCED?1:1-Math.exp(-dt*(tour>=0?2.2:watch.on?1.25:4.2));
       for(const q in view)cur[q]+=(view[q]-cur[q])*k;
       swayK+=((stage.classList.contains('idle')&&!sel&&tour<0&&!watch.on&&!REDUCED?1:0)-swayK)*Math.min(1,dt*.6);
@@ -3022,6 +3036,23 @@ function openPanel(kind,id){
   if(G){G.ring.visible=true; if(kind==='agent'){G.ring.position.set(t.x,.03+(t.h||0),t.y-.3);flyTo(t.x,.55+(t.h||0),t.y-.3,SMALL?10:13);}else if(t.far){G.ring.visible=false;flyTo(t.x,t.h,t.y,t.far,t.pol);}else{G.ring.visible=!t.big;G.ring.position.set(t.x,.03+(t.up||0),t.y);flyTo(t.x,.6+(t.up||0),t.y,t.big?(SMALL?14:17):(SMALL?10:13));}}
   paintPanelDec(); updatePanel(); panel.scrollTop=0;
 }
+function dropSel(){if(!sel)return;sel=null;panel.hidden=true;labelsEl.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));if(G)G.ring.visible=false;}
+(function(){const j=document.getElementById('joy'),k=document.getElementById('joyKnob');if(!j)return;
+  try{if(matchMedia('(pointer:coarse)').matches||'ontouchstart' in window)document.documentElement.classList.add('has-touch');}catch(_){}
+  let id=null;const R=40,DZ=.12;
+  const set=e=>{const r=j.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const d=Math.hypot(dx,dy);if(d>R){dx=dx/d*R;dy=dy/d*R;}
+    k.style.transform='translate('+dx+'px,'+dy+'px)';const m=Math.min(1,d/R),sc=m<DZ?0:((m-DZ)/(1-DZ))*((m-DZ)/(1-DZ))/m;JOY.x=dx/R*sc;JOY.y=dy/R*sc;};
+  const end=e=>{if(e&&e.pointerId!==id)return;id=null;j.classList.remove('drag');k.style.transform='';JOY.x=JOY.y=0;JOY.on=keys.size>0;if(keys.size)fromKeys();};
+  j.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();id=e.pointerId;try{j.setPointerCapture(id);}catch(_){}j.classList.add('drag');JOY.on=true;dropSel();set(e);});
+  j.addEventListener('pointermove',e=>{if(e.pointerId===id){e.preventDefault();set(e);}});
+  j.addEventListener('pointerup',end);j.addEventListener('pointercancel',end);j.addEventListener('lostpointercapture',end);
+  j.addEventListener('contextmenu',e=>e.preventDefault());
+  const keys=new Set(),MAP={w:'u',arrowup:'u',s:'d',arrowdown:'d',a:'l',arrowleft:'l',d:'r',arrowright:'r'};
+  const fromKeys=()=>{if(id!==null)return;JOY.x=(keys.has('r')?1:0)-(keys.has('l')?1:0);JOY.y=(keys.has('d')?1:0)-(keys.has('u')?1:0);const m=Math.hypot(JOY.x,JOY.y);if(m>1){JOY.x/=m;JOY.y/=m;}JOY.on=keys.size>0;};
+  document.addEventListener('keydown',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)||e.metaKey||e.ctrlKey||e.altKey)return;const m=MAP[e.key.toLowerCase()];if(!m)return;
+    e.preventDefault();if(!keys.size)dropSel();keys.add(m);fromKeys();});
+  document.addEventListener('keyup',e=>{const m=MAP[(e.key||'').toLowerCase()];if(!m)return;keys.delete(m);fromKeys();});
+  window.addEventListener('blur',()=>{keys.clear();fromKeys();});})();
 function closePanel(){sel=null;panel.hidden=true;labelsEl.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));if(G){G.ring.visible=false;goHome();}}
 function paintPanelDec(){
   const el=$('#p-dec'); if(!el||!sel)return;

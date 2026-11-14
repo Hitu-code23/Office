@@ -33,6 +33,7 @@ Twenty-seven AI agents in nine teams, led by Director Harsh, work in a three-flo
 | Rotate | Drag | Drag |
 | Zoom | Scroll | Pinch |
 | Select | Click | Tap |
+| Move around the islands | W A S D or arrow keys | Joystick (bottom right) |
 
 The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, weather, occasions, camera controls and the activity feed.
 

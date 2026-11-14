@@ -1309,10 +1309,12 @@ function init3D(){
      Car paint, glass, the helicopter and the pool reflect it. It refreshes one face per frame every few seconds. ----- */
   const envRT=new T3.WebGLCubeRenderTarget(LITE?64:128,{format:T3.RGBAFormat,generateMipmaps:true,minFilter:T3.LinearMipmapLinearFilter});
   const envCam=new T3.CubeCamera(.5,900,envRT);envCam.position.set(15.5,2.2,19.6);scene.add(envCam);
-  const envS={face:0,next:0},mirX=[],XH=[];
+  const envB=new T3.WebGLCubeRenderTarget(LITE?64:128,{format:T3.RGBAFormat,generateMipmaps:true,minFilter:T3.LinearMipmapLinearFilter});
+  const envS={face:0,next:0,front:envRT,back:envB},mirX=[],XH=[];
+  function envSwap(){const a=envS.front.texture,b=envS.back.texture;scene.traverse(o=>{const m=o.material;if(!m)return;(Array.isArray(m)?m:[m]).forEach(q=>{if(q.envMap===a)q.envMap=b;});});const t=envS.front;envS.front=envS.back;envS.back=t;}
   function envTick(){const now=performance.now();if(envS.face>=6){if(now<envS.next)return;envS.face=0;}
-    const f=envS.face,tex=envRT.texture;tex.generateMipmaps=f===5;renderer.setRenderTarget(envRT,f);renderer.render(scene,envCam.children[f]);tex.generateMipmaps=true;
-    envS.face++;if(envS.face>=6)envS.next=now+(LITE?7000:SMALLDEV?6000:2500);}
+    const f=envS.face,T=envS.back,tex=T.texture;tex.generateMipmaps=f===5;renderer.setRenderTarget(T,f);renderer.render(scene,envCam.children[f]);tex.generateMipmaps=true;
+    envS.face++;if(envS.face>=6){envSwap();envS.next=now+(LITE?7000:SMALLDEV?6000:2500);}}
   poolMat.envMap=envRT.texture;poolMat.roughness=.06;poolMat.envMapIntensity=.9;
   if(city0.fw){city0.fw.material.envMap=envRT.texture;city0.fw.material.envMapIntensity=.9;city0.fw.material.roughness=.05;city0.fw.material.needsUpdate=true;}
   /* cars: a smooth body shaped from a side profile, a tinted glass cabin, a roof, pillars, mirrors, lights, tyres and alloy rims */
@@ -2019,8 +2021,8 @@ function init3D(){
   /* opening shot: out of the clouds, past the waterfall, settling on the office */
   const intro={on:!REDUCED,t:0,dur:9};let swayK=0;const swv={tx:0,ty:0,tz:0,dist:1,az:0,pol:1};
   const hp=orbitPos(view,V(0,0,0));
-  const cPos=new T3.CatmullRomCurve3([V(-36,31,56),V(-12,12,46),V(2.5,.6,28),V(18,4.5,31),hp.clone()],false,'catmullrom',.5);
-  const cTgt=new T3.CatmullRomCurve3([V(-14,16,28),V(2,2,24),V(6,-4.5,18),V(9,-.6,10),V(view.tx,view.ty,view.tz)],false,'catmullrom',.5);
+  const cPos=new T3.CatmullRomCurve3([V(-36,31,70),V(-8,22,63),V(8,16.5,52),V(25,15.5,33),hp.clone()],false,'catmullrom',.5);
+  const cTgt=new T3.CatmullRomCurve3([V(-10,14,38),V(7,3,39),V(15,1.5,38),V(15,1,20),V(view.tx,view.ty,view.tz)],false,'catmullrom',.5);
   function endIntro(){intro.on=false;Object.assign(cur,view);stage.classList.remove('intro','titled');lastFps=performance.now();slow=0;showHint();}
   if(intro.on)stage.classList.add('intro');
   let off=0,offY=0;

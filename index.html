@@ -2508,10 +2508,10 @@ function init3D(){
   const acad=board(640,240,5.6,2.1,-12,F2+1.5,TWZ0+.28),stg=board(800,300,6.4,2.4,-24,1.65,-8.6),tsign=board(512,96,5.2,.95,-12.06,TH+1.05,TWZ0+.1),csign=board(256,64,1.7,.42,-24.8,1.62,12.66);
   let lesson=0,slide=0;
   function drawAnnex(){const A=THEME.accent||'#8B6CFF';
-    {const g=acad.g,L=[['Lesson 4','Google Ads that pay for themselves'],['Lesson 5','A website that books calls'],['Lesson 6','Instagram in 15 minutes a day']][lesson%3];g.fillStyle='#0F1420';g.fillRect(0,0,640,240);
+    {const g=acad.g,L=[['Lesson 4','Google Ads that pay for themselves'],['Lesson 5','A website that books calls'],['Lesson 6','Instagram in 15 minutes a day']][(lesson%3+3)%3];g.fillStyle='#0F1420';g.fillRect(0,0,640,240);
       g.fillStyle=A;g.fillRect(0,0,640,8);g.fillStyle='rgba(255,255,255,.6)';g.font='600 22px Kanit,system-ui,sans-serif';g.textBaseline='top';g.fillText(THEME.brand+' Academy · '+L[0],28,30);
-      g.fillStyle='#F4F2F8';g.font='700 38px Kanit,system-ui,sans-serif';g.fillText(L[1],28,70);[0,1,2].forEach(i=>{g.fillStyle=i===lesson%3?A:'rgba(255,255,255,.25)';g.fillRect(28+i*50,200,36,8);});acad.t.needsUpdate=true;}
-    {const g=stg.g,SL=[['Launch night','Welcome to '+THEME.brand],['Just launched','Tessaro Café · tessarocafe.ae'],['This week',fmt(S.sent)+' emails · '+S.booked+' calls booked']][slide%3];
+      g.fillStyle='#F4F2F8';g.font='700 38px Kanit,system-ui,sans-serif';g.fillText(L[1],28,70);[0,1,2].forEach(i=>{g.fillStyle=i===(lesson%3+3)%3?A:'rgba(255,255,255,.25)';g.fillRect(28+i*50,200,36,8);});acad.t.needsUpdate=true;}
+    {const g=stg.g,SL=[['Launch night','Welcome to '+THEME.brand],['Just launched','Tessaro Café · tessarocafe.ae'],['This week',fmt(S.sent)+' emails · '+S.booked+' calls booked']][(slide%3+3)%3];
       const gr=g.createLinearGradient(0,0,800,300);gr.addColorStop(0,'#1B1240');gr.addColorStop(1,'#0B0A14');g.fillStyle=gr;g.fillRect(0,0,800,300);g.fillStyle=A;g.fillRect(0,286,800,14);
       g.fillStyle='rgba(255,255,255,.65)';g.font='600 30px Kanit,system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(SL[0].toUpperCase(),400,100);
       g.fillStyle='#FFFFFF';g.font='700 54px Kanit,system-ui,sans-serif';let f=54;while(f>26&&g.measureText(SL[1]).width>740){f-=2;g.font='700 '+f+'px Kanit,system-ui,sans-serif';}g.fillText(SL[1],400,170);g.textAlign='left';stg.t.needsUpdate=true;}
@@ -3508,7 +3508,7 @@ catch(err){
 if(G){applyNames();loadThemeImages(()=>G.retheme());const q=G.quality();document.querySelectorAll('[data-q]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.q===q)));}
 /* ---------- live mode: real numbers and real events replace the simulation ---------- */
 if(LIVE.on){
-  const LV={found:0,researched:0,drafted:0,sent:0,replied:0,booked:0};let waiting=0,snooze=0;
+  const LV={found:0,researched:0,drafted:0,sent:0,replied:0,booked:0,opened:0};let waiting=0,snooze=0;
   Object.keys(LV).forEach(k=>Object.defineProperty(S,k,{get:()=>LV[k],set:()=>{},enumerable:true,configurable:true}));
   S.reach=0;S.reels=0;S.live=CLIENTS.filter(c=>c.url).length;S.rules=0;rules.length=0;
   const IDLE={scout:'Looking for new leads',research:'Waiting for new leads to check',writer:'Waiting for leads to write to',sender:'Outbox is empty',reply:'Watching the inbox',booker:'Waiting for replies to book',
@@ -3518,24 +3518,26 @@ if(LIVE.on){
   Object.keys(ACT).forEach(k=>{ACT[k]=()=>[IDLE[KT[k]]||'Working'];});
   spawnDecision=function(){};forceBook=function(){};
   leads.length=0;meetings.length=0;feed.length=0;
-  const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research'};
+  const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply'};
   const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote an email for '+l,approved:l=>'Email approved for '+l,sent:l=>'Sent the email to '+l,replied:l=>l+' replied',
-    booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l};
-  const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found'};
+    booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'Preview opened: '+l+' is looking'};
+  const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found',opened:'Warm'};
   const NEXT={scout:'research',research:'writer',writer:'sender',booker:null};
   const who=t=>agents.find(q=>q.team===t&&!q.home&&!q.paused)||agents.find(q=>q.team===t)||A.harsh;
   const when=iso=>{const d=new Date(new Date(iso).getTime()+4*3600e3),h=d.getUTCHours(),m=d.getUTCMinutes();return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+((h+11)%12+1)+':'+String(m).padStart(2,'0')+(h<12?' am':' pm');};
   function show(e){const a=who(TEAM[e.kind]||'director'),msg=(TXT[e.kind]||(l=>l))(e.label);a.status=msg;a.done++;setItem(a,msg);say(a,msg,true);
     if(G){const x=a.x+.18,y=1.25+(a.team==='marketing'?F2:0),z=a.y-.6,c=T[a.team].color,nx=NEXT[a.team]&&who(NEXT[a.team]);
       if(e.kind==='sent'){if(G.serverBlink)G.serverBlink();G.packet(x,y,z,x+7,10,z-15,c,1.5);}
-      else if(e.kind==='replied')G.packet(x-9,10,z+13,x,y,z,c,1.5);
+      else if(e.kind==='replied'||e.kind==='opened')G.packet(x-9,10,z+13,x,y,z,e.kind==='opened'?'#A4D8FF':c,1.5);
       else if(nx)G.packet(x,y,z,nx.x+.18,1.25,nx.y-.6,c,1.6);}
-    if(e.kind==='booked')celebrate();paintFeed();paintNumbers();}
+    if(e.kind==='booked')celebrate();else if(e.kind==='opened')snd.chime();paintFeed();paintNumbers();}
+  /* the Lead Vault sign also counts warm leads (opened their preview) */
+  {const pN=paintNumbers;paintNumbers=function(){pN();if(G&&LV.opened){const v=$('#t-vault');if(v)v.textContent=fmt(S.found)+' leads · '+LV.opened+' warm';}};}
   let last=null;
   const badge=ok=>{const b=$('#demoBadge');if(b)b.textContent=ok?'Live data · names hidden':'Live data · reconnecting…';};badge(true);
   async function poll(){if(document.hidden&&last!==null)return;
     try{const r=await fetch(LIVE.url+'/rest/v1/rpc/office_public',{method:'POST',headers:{apikey:LIVE.key,'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw new Error(r.status);const j=await r.json();
-      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked'].forEach(k=>{LV[k]=cn[k]||0;});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
+      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened'].forEach(k=>{LV[k]=cn[k]||0;});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
       /* emails ready to send wait in your Gmail drafts: one card in the Needs you tray */
       waiting=cn.waiting||0;{const i=decisions.findIndex(d=>d.live);
         if(waiting>0&&Date.now()>snooze){const t=waiting+' message'+(waiting>1?'s are':' is')+' ready to send';

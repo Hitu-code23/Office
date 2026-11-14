@@ -1644,7 +1644,7 @@ function init3D(){
     marketing(g,t,c){g.fillStyle='rgba(255,255,255,.1)';for(let i=0;i<6;i++){const h=20+(Math.sin(t*3+i)+1)*18;g.fillRect(12+i*18,70-h,12,h);}
       g.strokeStyle=c;g.lineWidth=3;g.beginPath();for(let i=0;i<7;i++){const y=50-i*5-Math.sin(t*4+i)*4;i?g.lineTo(10+i*18,y):g.moveTo(10,y);}g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(118,14,5,0,7);g.fill();},
   };
-  let bdayScr=null,bdayBill=null,bdayHold=false;   // birthday hooks, set by the birthday island
+  let bdayScr=null,bdayBill=null,bdayHold=false,bdayGirl=null;   // birthday hooks, set by the birthday island
   function drawScr(tt){for(const k in scrs){const s=scrs[k],g=s.g;g.fillStyle='#121627';g.fillRect(0,0,128,80);if(!(bdayScr&&bdayScr(g,tt,k)))SCR[k](g,tt*.11+s.off,(T[k]||T.director).color);s.t.needsUpdate=true;}}
   drawScr(0);
 
@@ -1847,7 +1847,7 @@ function init3D(){
   function officeLife(dt,tt,live,n){
     /* the working day: home at night, back in the morning */
     if(live){
-      if(n>.82&&!life.night&&!bdayHold){life.night=true;const stay=new Set(['harsh']);agents.slice().sort(()=>Math.random()-.5).slice(0,3).forEach(a=>stay.add(a.id));
+      if(n>.82&&!life.night&&!bdayHold){life.night=true;const stay=new Set(['harsh']);if(bdayGirl)stay.add(bdayGirl);agents.slice().sort(()=>Math.random()-.5).slice(0,3).forEach(a=>stay.add(a.id));
         life.commute=agents.filter(a=>!stay.has(a.id)&&!a.home).map(a=>({a,out:true}));}
       if(n<.3&&life.night){life.night=false;life.commute=agents.filter(a=>a.home).map(a=>({a,out:false}));}
       life.commuteT-=dt;
@@ -3253,6 +3253,39 @@ function init3D(){
       c.fillText(BDN,400,248);c.shadowBlur=0;const left=momentAt()-Date.now();c.font='600 30px Kanit,system-ui,sans-serif';c.fillStyle='#FFC2DA';
       c.fillText(left>0&&left<48*3600e3?'the party starts in '+hms(left):'from everyone at the office ♥',400,378);return true;};
 
+    /* ---- the birthday girl herself: the office agent with her name (the Team Lead) wears a tiara and spends her day at her party ---- */
+    const girl=NAME?agents.find(a=>String(a.name||'').trim().toLowerCase()===NAME.toLowerCase())||null:null;
+    if(girl&&bigNow)bdayGirl=girl.id;
+    let tiara=null,deskB=null,girlParty=0,girlCheck=1.5,girlHop=0;
+    if(girl){const GD=0xF4C542,GS=0xD9A93A,tb=new Builder(0,false);
+      tb.box(-.168,.318,-.168,.336,.045,.336,GD,GS);
+      [[-.11,.075],[0,.12],[.11,.075]].forEach(q=>tb.cb(q[0],.36,.152,.05,q[1],.032,GD,GS));
+      tb.cb(0,.405,.17,.05,.05,.02,0xFF4F8A,0xE8336E).cb(-.11,.385,.17,.032,.032,.02,0xFFFFFF).cb(.11,.385,.17,.032,.032,.02,0xFFFFFF);
+      tiara=new T3.Mesh(tb.geo(),new T3.MeshLambertMaterial({vertexColors:true,emissive:0x6A4A10,emissiveIntensity:.4}));tiara.visible=false;girl.P.head.add(tiara);
+      /* three balloons tied at her desk */
+      const BX=girl.x+.86,BZ=girl.y+.42,bp=[[BX,1.78,BZ,0xFF8FB8],[BX+.2,2.02,BZ-.12,0xF4C542],[BX-.18,2.08,BZ-.16,0xFFFFFF]];
+      deskB=new T3.Group();const im=new T3.InstancedMesh(balGeo,balMat,bp.length);
+      bp.forEach((q,i)=>{P3.set(q[0],q[1],q[2]);S3.set(.2,.23,.2);M4.compose(P3,Q4,S3);im.setMatrixAt(i,M4);im.setColorAt(i,lin(q[3]));});deskB.add(im);
+      const sg=new T3.BufferGeometry();sg.setAttribute('position',new T3.Float32BufferAttribute(bp.flatMap(q=>[q[0],q[1]-.22,q[2],BX,.16,BZ]),3));
+      deskB.add(new T3.LineSegments(sg,new T3.LineBasicMaterial({color:0xF4F0EA})));
+      const wb=new Builder(0,false);wb.cb(BX,.1,BZ,.12,.08,.12,GD,GS);deskB.add(new T3.Mesh(wb.geo(),litMat));
+      deskB.visible=false;scene.add(deskB);}
+    const partyPath=a=>leavePath(a).concat([V(14.8,0,31.4),V(15,0,33.6),V(15,0,35.75),V(13.85,0,35.75),V(12.3,0,36.4),V(10.3,0,37.4),V(10.3,0,40.9),V(8.6,0,41.6),V(8.1,0,42.6),V(8.0,0,45.0),V(15,0,45.05)]);
+    const secsLeftToday=()=>{const d=new Date(Date.now()+4*3600e3);return Math.max(60,86400-(d.getUTCHours()*3600+d.getUTCMinutes()*60+d.getUTCSeconds()));};
+    function girlTick(dt,tt){if(!girl)return;
+      bdayGirl=bigNow?girl.id:null;tiara.visible=deskB.visible=bigNow;
+      girlCheck-=dt;if(girlCheck<=0){girlCheck=1.5;
+        const sp=girl.lab&&girl.lab.querySelector('span'),tag=' · birthday girl ♥';
+        if(sp){if(bigNow&&!sp.textContent.includes(tag))sp.textContent+=tag;else if(!bigNow&&sp.textContent.includes(tag))sp.textContent=sp.textContent.replace(tag,'');}
+        if(bigNow&&!girlParty&&idle(girl)){girlParty=1;go(girl,partyPath(girl),{kind:'party',hold:secsLeftToday(),speed:1.8,onArrive:a=>{a.grp.rotation.y=0;girlParty=2;},onDone:()=>{girlParty=3;}});}
+        if(girlParty===3&&!girl.walk&&!bigNow)girlParty=0;
+        }
+      if(girlParty===2)girl.status='At her birthday party ♥';
+      if(girlParty===2&&girl.walk){const P=girl.P;
+        if(show){const w=Math.sin(tt*9);P.aL.rotation.x=-1.8+w*.3;P.aR.rotation.x=-1.8-w*.3;girlHop=Math.abs(Math.sin(tt*6))*.12;}
+        else{if(tt%8<3)P.aR.rotation.x=-1.4+Math.sin(tt*7)*.35;girlHop*=.8;}
+        girl.grp.position.y=girlHop;}}
+
     /* the island tag and tap target */
     pickBox(KX,1.6,CZ,21,3.4,15,'bday','island');
     {const d=document.createElement('div');d.className='lab';d.innerHTML=`<button class="tagb obj bday" data-bday="1"><i style="background:#FF6FAE"></i><span>${NAME?NAME+'’s ':''}Birthday Island</span></button>`;
@@ -3318,7 +3351,7 @@ function init3D(){
           c.r.set(c.r.x+c.w.x*dt*(c.p.y>.06?1:0),c.r.y+c.w.y*dt*(c.p.y>.06?1:0),c.r.z+c.w.z*dt*(c.p.y>.06?1:0));CQ.setFromEuler(c.r);M4.compose(c.p,CQ,ONE);conf.setMatrixAt(i,M4);}
         conf.instanceMatrix.needsUpdate=true;if(done)conf.visible=false;}
       if(show){showT+=dt;if(dQueued&&showT>4.2){dQueued=0;droneStart();}if(showT>(dOn||dQueued?4.2+DEND+1:16))show=0;}
-      droneTick(dt,tt);
+      droneTick(dt,tt);girlTick(dt,tt);
       /* the plane and the heart balloon come out on her birthday, during the show, and on the birthday link */
       bigNow=big;const party=big||show||linkMode||dOn;lift+=((dOn?24:0)-lift)*Math.min(1,dt*.35);
       plane.visible=HB.visible=party;

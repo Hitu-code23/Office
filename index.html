@@ -1122,7 +1122,7 @@ function init3D(){
       else{P.lL.rotation.x=P.lR.rotation.x=0;ease(P.aL.rotation,'x',w.kind==='note'?HALF:.5,.2);ease(P.aR.rotation,'x',w.kind==='note'?-1.25+Math.sin(tt*13)*.22:.5,.3);}
       if(w.wait<=0){if(w.onDone)w.onDone(a);P.carry.visible=false;P.cup.visible=!!w.cupBack;w.dir=-1;w.i=w.pts.length-2;}
       return;}
-    const t=w.pts[w.i],dx=t.x-w.lx,dz=t.z-w.lz,d=Math.hypot(dx,dz);let st=(w.speed||1.55)*(1+.35*wx.rain*(1-roofK))*dt;
+    const t=w.pts[w.i],dx=t.x-w.lx,dz=t.z-w.lz,d=Math.hypot(dx,dz);let st=(w.speed||1.55)*(1+.35*wx.rain*(1-roofCover))*dt;
     if(d>.001){const fx0=dx/d,fz0=dz/d,me=g.position;let jam=false;
       const ahead=(ox,oz,r)=>{const ex=ox-me.x,ez=oz-me.z,ah=ex*fx0+ez*fz0;return ah>0&&ah<r&&Math.abs(ex*fz0-ez*fx0)<.24;};
       for(const o of agents)if(o!==a&&o.walk&&!o.home&&ahead(o.grp.position.x,o.grp.position.z,.4)){jam=true;break;}
@@ -1744,7 +1744,7 @@ function init3D(){
     add('billboard','The billboard',8.5,7.2,-8.4,20,.5);
     add('booking','A call just got booked',14.6,.9,8.9,9.5,0);
     if(life.room>0)add('room','A meeting in progress',10.2,.6,13.6,9.5,2.6);
-    add('lounge','Clients in the lounge',28.2,.8,3.4,10,.9);add('chill','The chill zone',28,.5,8.4,10,.8);add('terrace','The terrace',24,.4,13.9,13,.8);add('wing','The new wing',21.5,.6,5,15,.9);if(roofMove>0)add('roof',roofGoal?'The glass roof closing for the rain':'The glass roof opening again',15.5,4,3,34,3);add('upstairs','Upstairs',13,3.2,-4.6,20,.9);add('garden','The garden and fountain',9,.6,21,15,.7);add('parking','The parking',24.5,.5,20.7,16,.4);
+    add('lounge','Clients in the lounge',28.2,.8,3.4,10,.9);add('chill','The chill zone',28,.5,8.4,10,.8);add('terrace','The terrace',24,.4,13.9,13,.8);add('wing','The new wing',21.5,.6,5,15,.9);if(roofMove>0)add('roof',roofGoal?'The roof rising for the rain':'The roof going back underground',15.5,3,4,36,3);add('upstairs','Upstairs',13,3.2,-4.6,20,.9);add('garden','The garden and fountain',9,.6,21,15,.7);add('parking','The parking',24.5,.5,20.7,16,.4);
     if(A.tia.walk&&A.tia.walk.kind==='film'&&A.tia.walk.wait>0)add('studio','Filming a reel',28.2,3.4,-5.8,9,2.4);
     {const gy=agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='run'||a.walk.kind==='lift')).length;if(gy)add('gym','A workout upstairs',12.2,3.3,-5.6,10,1+gy*.4);}
     const caf=agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='table'||a.walk.kind==='coffee')).length;
@@ -1768,24 +1768,40 @@ function init3D(){
   function watchSet(on){watch.on=on;document.getElementById('live').hidden=!on;const b=document.getElementById('watchBtn');if(b)b.setAttribute('aria-pressed',String(on));
     if(on){watch.last='';nextShot();}else{watch.shot=null;goHome();}}
 
-  /* ----- the glass roof: louvers stand open in fine weather and tilt shut, one after another, when the rain comes ----- */
-  const ROOFY=4.75,RLN=14,RZ0=-9,RZ1=11.75,RLP=(RZ1-RZ0)/RLN;let roofK=0,roofGoal=0,roofMove=0;
+  /* ----- the hidden roof: it lives under the ground. When rain starts, posts and beams rise out of slots around the building,
+     then glass slides out from both sides and meets in the middle. When the rain stops, it all goes back underground. ----- */
+  const ROOFY=4.75,RX0=-.25,RX1=31.25,RZ0=-9.06,RZ1=11.75,RSN=14,RSP=(RZ1-RZ0)/RSN,RHW=(RX1-RX0)/2,RDROP=ROOFY+.45;
+  let roofK=0,roofGoal=0,roofMove=0,roofCover=0;
+  const RPOSTS=[[RX0,RZ1],[7.6,RZ1],[13.2,RZ1],[18.3,RZ1],[24,RZ1],[RX1,RZ1],[RX0,5.5],[RX1,5.5],[RX0,-.4],[RX1,-.4],[RX0,RZ0+.04],[RX1,RZ0+.04]],RBACK=[15.5];
+  const roofFrame=new T3.Group();
   {const fb=new Builder(LITE?0:.03,false),DK=0x2C2833;
-    [[.15,11.75],[7.6,11.75],[13.2,11.75],[18.3,11.75],[24,11.75],[30.85,11.75],[.15,5.5],[30.85,5.5],[.15,-.4],[30.85,-.4]].forEach(p=>fb.box(p[0]-.07,0,p[1]-.07,.14,ROOFY,.14,DK));
-    [.15,15.5,30.85].forEach(x=>fb.box(x-.07,F2,RZ0+.03,.14,ROOFY-F2,.14,DK));
-    fb.box(0,ROOFY-.16,RZ1-.06,31,.12,.12,DK).box(0,ROOFY-.16,RZ0-.06,31,.12,.12,DK).box(.09,ROOFY-.16,RZ0,.12,.12,RZ1-RZ0,DK).box(30.79,ROOFY-.16,RZ0,.12,.12,RZ1-RZ0,DK).box(15.44,ROOFY-.16,RZ0,.12,.12,RZ1-RZ0,DK);
-    const m=new T3.Mesh(fb.geo(),litMat);m.castShadow=!LITE;scene.add(m);}
-  const roofGlass=new T3.MeshPhongMaterial({color:0xCFEAFF,transparent:true,opacity:.2,shininess:150,specular:0xffffff,depthWrite:false,side:T3.DoubleSide});
-  const louvers=[];
-  for(let i=0;i<RLN;i++){const g=new T3.Group();g.position.set(15.5,ROOFY,RZ0+RLP*(i+.5));
-    const gl=new T3.Mesh(new T3.BoxGeometry(30.7,.025,RLP*1.02),roofGlass);gl.renderOrder=3;g.add(gl);
-    const fr=new Builder(0,false);fr.box(-15.35,-.03,-RLP*.51,30.7,.06,.06,0x2C2833).box(-15.35,-.03,RLP*.51-.06,30.7,.06,.06,0x2C2833).box(-15.38,-.04,-RLP*.51,.06,.08,RLP*1.02,0x2C2833).box(15.32,-.04,-RLP*.51,.06,.08,RLP*1.02,0x2C2833);
-    const fm=new T3.Mesh(fr.geo(),litMat);fm.castShadow=!LITE;g.add(fm);g.rotation.x=-1.52;scene.add(g);louvers.push(g);}
+    RPOSTS.forEach(p=>fb.box(p[0]-.08,0,p[1]-.08,.16,ROOFY,.16,DK));RBACK.forEach(x=>fb.box(x-.08,F2,RZ0-.02,.16,ROOFY-F2,.16,DK));
+    fb.box(RX0,ROOFY-.17,RZ1-.07,RX1-RX0,.14,.14,DK).box(RX0,ROOFY-.17,RZ0-.03,RX1-RX0,.14,.14,DK).box(RX0-.07,ROOFY-.17,RZ0,.14,.14,RZ1-RZ0,DK).box(RX1-.07,ROOFY-.17,RZ0,.14,.14,RZ1-RZ0,DK);
+    const m=new T3.Mesh(fb.geo(),litMat);m.castShadow=!LITE;roofFrame.add(m);}
+  const rLeds=new T3.Mesh(new T3.BoxGeometry(.04,.5,.04),new T3.MeshBasicMaterial({color:0x6FD3FF,toneMapped:false}));
+  RPOSTS.forEach(p=>{const l=rLeds.clone();l.position.set(p[0],ROOFY-.5,p[1]+.09);roofFrame.add(l);});
+  roofFrame.position.y=-RDROP;roofFrame.visible=false;scene.add(roofFrame);
+  /* slots in the ground where it hides, with a light strip that wakes up when it moves */
+  {const sb=new Builder(0,false);RPOSTS.forEach(p=>sb.box(p[0]-.16,.004,p[1]-.16,.32,.012,.32,0x15131C));RBACK.forEach(x=>sb.box(x-.16,F2+.004,RZ0-.1,.32,.012,.32,0x15131C));
+    sb.box(RX0,.003,RZ1-.1,RX1-RX0,.01,.2,0x2A2733);scene.add(new T3.Mesh(sb.geo(),litMat));}
+  const slotGlow=new T3.Mesh(new T3.BoxGeometry(RX1-RX0,.012,.05),new T3.MeshBasicMaterial({color:0x6FD3FF,transparent:true,opacity:.15,toneMapped:false,depthWrite:false}));
+  slotGlow.position.set((RX0+RX1)/2,.012,RZ1);scene.add(slotGlow);
+  /* glass that slides out of both side beams */
+  const roofGlass=new T3.MeshPhongMaterial({color:0xCFEAFF,transparent:true,opacity:.26,shininess:150,specular:0xffffff,depthWrite:false,side:T3.DoubleSide});
+  const roofHalves=[];
+  for(let i=0;i<RSN;i++)for(const side of [0,1]){const g=new T3.Group(),zc=RZ0+RSP*(i+.5);g.position.set(side?RX1:RX0,ROOFY,zc);
+    const gl=new T3.Mesh(new T3.BoxGeometry(RHW,.025,RSP*1.01),roofGlass);gl.position.x=side?-RHW/2:RHW/2;gl.renderOrder=3;g.add(gl);
+    const fr=new Builder(0,false);fr.box(side?-RHW:0,-.03,-RSP*.505,RHW,.05,.05,0x2C2833).box(side?-RHW:0,-.03,RSP*.505-.05,RHW,.05,.05,0x2C2833).box(side?-RHW:RHW-.05,-.035,-RSP*.505,.05,.07,RSP*1.01,0x2C2833);
+    g.add(new T3.Mesh(fr.geo(),litMat));g.scale.x=.001;g.visible=false;scene.add(g);roofHalves.push({g,i});}
+  const ez=x=>x*x*(3-2*x);
   function roofTick(dt){const want=(wx.cur==='rain'||wx.rain>.2)?1:0;
-    if(want!==roofGoal){roofGoal=want;roofMove=4.5;watchEvent('roof');if(typeof snd!=='undefined'&&snd.on&&snd.ctx){snd.note(98,0,1.6,.06);snd.note(131,.25,1.4,.05);snd.note(want?165:196,.5,1.2,.04);}}
-    if(roofMove>0)roofMove-=dt;roofK+=clamp(roofGoal-roofK,-dt*.28,dt*.28);
-    louvers.forEach((g,i)=>{const k=clamp(roofK*1.55-(i/(RLN-1))*.55,0,1),e=k*k*(3-2*k);g.rotation.x=-1.52*(1-e);});
-    roofGlass.opacity=.08+.2*roofK;}
+    if(want!==roofGoal){roofGoal=want;roofMove=7;watchEvent('roof');
+      if(typeof snd!=='undefined'&&snd.on&&snd.ctx){snd.note(55,0,2.4,.09);snd.note(82,.1,2.2,.06);snd.note(want?123:110,.9,1.6,.04);}}
+    if(roofMove>0)roofMove-=dt;roofK+=clamp(roofGoal-roofK,-dt*.16,dt*.16);
+    const up=ez(clamp(roofK/.42,0,1));roofFrame.position.y=-RDROP*(1-up);roofFrame.visible=up>.001;
+    let cov=0;roofHalves.forEach(h=>{const k=ez(clamp((roofK-.42)/.58*1.6-h.i/(RSN-1)*.6,0,1));h.g.scale.x=Math.max(.001,k);h.g.visible=k>.002;cov+=k;});
+    roofCover=cov/roofHalves.length;
+    const moving=Math.abs(roofGoal-roofK)>.002;slotGlow.material.opacity=moving?.55+.4*Math.sin(performance.now()/120):.15;rLeds.material.color.setHex(moving?0x6FD3FF:0x2C4A66);}
 
   /* ----- weather: rain with puddles, morning mist, dust storms, a rainbow after rain ----- */
   const wx={mode:'auto',cur:'clear',rain:0,mist:0,dust:0,next:45,dur:0,rainbow:0};
@@ -1814,10 +1830,10 @@ function init3D(){
     const k=Math.min(1,dt*.35);wx.rain+=((wx.cur==='rain')-wx.rain)*k;wx.mist+=((wx.cur==='mist')-wx.mist)*k;wx.dust+=((wx.cur==='dust')-wx.dust)*k;
     /* rain */
     rainMesh.visible=wx.rain>.02;if(rainMesh.visible){rainMesh.material.opacity=.55*wx.rain*(1-.45*n);
-      if(live)for(let i=0;i<RN;i++){const o=i*6;let y=rpos[o+1]-15*dt;const px=rpos[o],pz=rpos[o+2],under=px>0&&px<31&&pz>-9&&pz<11.75,stop=under?(roofK>.8?ROOFY+.06:floorY(px,pz)):-.2;
+      if(live)for(let i=0;i<RN;i++){const o=i*6;let y=rpos[o+1]-15*dt;const px=rpos[o],pz=rpos[o+2],under=px>-.25&&px<31.25&&pz>-9&&pz<11.75,stop=under?(roofCover>.97?ROOFY+.06:floorY(px,pz)):-.2;
         if(y<stop){y=12+Math.random()*3;const x=-3+Math.random()*37,z=-11+Math.random()*38;rpos[o]=x;rpos[o+2]=z;rpos[o+3]=x-.05;rpos[o+5]=z+.02;}rpos[o+1]=y;rpos[o+4]=y-.42;}
       rgeo.attributes.position.needsUpdate=true;}
-    puddles.forEach((m,i)=>{const t=clamp(wx.rain*1.4-.25-(i%3)*.08,0,1)*(1-roofK);m.visible=t>0.01;m.material.opacity=t*.55;m.scale.set(.6+.4*t,.42+.28*t,1);});
+    puddles.forEach((m,i)=>{const t=clamp(wx.rain*1.4-.25-(i%3)*.08,0,1)*(1-roofCover);m.visible=t>0.01;m.material.opacity=t*.55;m.scale.set(.6+.4*t,.42+.28*t,1);});
     /* dust */
     dustMesh.visible=wx.dust>.02;if(dustMesh.visible){dustMesh.material.opacity=.75*wx.dust;
       if(live)for(let i=0;i<DN;i++){const o=i*3;dpos[o]+=dt*(2.6+Math.sin(dseed[i])*.8);dpos[o+1]+=Math.sin(tt*1.7+dseed[i])*dt*.3;if(dpos[o]>23){dpos[o]=-6;dpos[o+1]=Math.random()*6;dpos[o+2]=-6+Math.random()*28;}}
@@ -2322,7 +2338,7 @@ const TOUR=[
   {t:'Upstairs: dining hall and gym',p:'The whole team eats lunch together upstairs, and works out in the gym next door.',at:[8,3.2,-4.6],d:17},
   {t:'Content studio',p:'Tia films reels and client videos in front of the lights.',at:[28.2,3.3,-5.6],d:12},
   {t:'Garden and parking',p:'The front gate, the driveway, the team’s cars and a fountain garden by the canal.',at:[16,.5,21],d:22},
-  {t:'The glass roof',p:'When rain starts, the glass louvers over the building tilt shut one after another. When it clears, they open again.',at:[15.5,4.2,2],d:34},
+  {t:'The hidden roof',p:'It lives underground. When rain starts, it rises out of the floor and glass slides across the top. When the rain stops, it hides again.',at:[15.5,3,3],d:36},
   {t:'Built by {brand}',p:'The billboard on the ridge shows off {brand}.',at:[8.5,7.2,-8.4],d:22}
 ];
 let tourTimer=null;

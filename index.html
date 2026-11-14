@@ -3519,7 +3519,7 @@ if(LIVE.on){
   spawnDecision=function(){};forceBook=function(){};
   leads.length=0;meetings.length=0;feed.length=0;
   const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply'};
-  const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote an email for '+l,approved:l=>'Email approved for '+l,sent:l=>'Sent the email to '+l,replied:l=>l+' replied',
+  const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote a message for '+l,approved:l=>'Harsh approved the message for '+l,sent:l=>'Message sent to '+l,replied:l=>l+' replied',
     booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'A lead opened their preview: '+l};
   const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found',opened:'Warm'};
   const NEXT={scout:'research',research:'writer',writer:'sender',booker:null};
@@ -3533,6 +3533,8 @@ if(LIVE.on){
     if(e.kind==='booked')celebrate();else if(e.kind==='opened')snd.chime();paintFeed();paintNumbers();}
   /* the Lead Vault sign also counts warm leads (opened their preview) */
   {const pN=paintNumbers;paintNumbers=function(){pN();if(G&&LV.opened){const v=$('#t-vault');if(v)v.textContent=fmt(S.found)+' leads · '+LV.opened+' warm';}};}
+  const at=iso=>{const d=new Date(new Date(iso).getTime()+4*3600e3),n=new Date(Date.now()+4*3600e3),hm=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');
+    return d.toISOString().slice(0,10)===n.toISOString().slice(0,10)?hm:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+hm;};
   let last=null;
   const badge=ok=>{const b=$('#demoBadge');if(b)b.textContent=ok?'Live data · names hidden':'Live data · reconnecting…';};badge(true);
   async function poll(){if(document.hidden&&last!==null)return;
@@ -3548,7 +3550,7 @@ if(LIVE.on){
           else if(decisions[i].title!==t){decisions[i].title=t;decisions[i].short=waiting+' message'+(waiting>1?'s':'')+' ready to send';onDecisionsChanged();}}
         else if(i>=0&&waiting===0){decisions.splice(i,1);onDecisionsChanged();}}
       const ev=(j.events||[]).slice().reverse();
-      if(last===null)ev.forEach(e=>{const a=who(TEAM[e.kind]||'director');if(TXT[e.kind])pushFeed(a,TXT[e.kind](e.label));});
+      if(last===null)ev.forEach(e=>{const a=who(TEAM[e.kind]||'director');if(TXT[e.kind]){pushFeed(a,TXT[e.kind](e.label));if(e.created_at)feed[0].t=at(e.created_at);}});
       else ev.filter(e=>e.id>last).forEach((e,i)=>setTimeout(()=>show(e),i*1800));
       last=ev.reduce((m,e)=>Math.max(m,e.id),last||0);
       leads.length=0;(j.events||[]).forEach(e=>{if(!leads.some(l=>l.biz===e.label))leads.push({biz:e.label,area:'',stage:STG[e.kind]||'Found'});});

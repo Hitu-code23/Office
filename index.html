@@ -451,7 +451,7 @@ body{font-weight:400;letter-spacing:.005em}
       <button class="btn glass" id="z-out" aria-label="Zoom out">−</button>
       <button class="btn glass" id="z-home">Reset view</button>
     </div>
-    <div class="mrow"><button class="btn glass" id="worldBtn">World view</button></div>
+    <div class="mrow"><button class="btn glass" id="worldBtn" style="flex:1">World view</button><button class="btn glass" id="burjBtn" style="flex:1">Burj Khalifa view</button></div>
     <p class="mnote" id="camhint">Drag to rotate, scroll or pinch to zoom.</p>
     <div class="mrow" style="margin-top:12px"><button class="btn glass" id="themeBtn" aria-expanded="false" aria-controls="themer">Client theme…</button></div>
   </div>
@@ -1483,7 +1483,7 @@ function init3D(){
     else{autoDropped=false;slow=0;if(!LITE)raiseFx();else dropFx();shadowRes(LITE?1024:2048);}}
 
   /* ----- camera: orbit, zoom, fly-to, opening shot ----- */
-  const maxDist=()=>Math.max(home.dist*1.7,290);
+  const maxDist=()=>Math.max(home.dist*1.7,360);
   function fit(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
     const vf=camera.fov*Math.PI/360,hf=Math.atan(Math.tan(vf)*camera.aspect);
     const d=clamp(Math.max(12.6/Math.sin(vf),(w<700?7.4:15.4)/Math.sin(hf)),20,74);
@@ -1977,7 +1977,9 @@ function init3D(){
     scene.add(g);return{g,a:i*1.57,r:95+i*12,h:6+i*7,sp:.012+i*.003};});
 
   /* ----- tap targets and name tags for the far places ----- */
-  Object.assign(OBJ,{museum:{x:MX,y:MZ,far:48,h:DY+8},palm:{x:PJX-8,y:PJZ,far:110,h:PJY+4},arab:{x:SX,y:SZ,far:62,h:EY+16},burj:{x:BX,y:BZ,far:175,h:58},downtown:{x:DX,y:DZ,far:85,h:0},beach:{x:EX+8,y:EZ+5,far:70,h:-4},homes:{x:HX,y:HZ,far:62,h:0}});
+  /* a camera that fits the whole tower, base to spire, in the frame */
+  const BURJH=city.burjTop-BY,BURJV={y:BY+BURJH*.5,d:BURJH*1.12/(2*Math.tan(16*Math.PI/180))};
+  Object.assign(OBJ,{museum:{x:MX,y:MZ,far:48,h:DY+8},palm:{x:PJX-8,y:PJZ,far:110,h:PJY+4},arab:{x:SX,y:SZ,far:62,h:EY+16},burj:{x:BX,y:BZ,far:BURJV.d,h:BURJV.y,pol:1.32},downtown:{x:DX,y:DZ,far:85,h:0},beach:{x:EX+8,y:EZ+5,far:70,h:-4},homes:{x:HX,y:HZ,far:62,h:0}});
   pickBox(BX,BY+60,BZ,16,120,16,'obj','burj');pickBox(SX,SY+18,SZ,16,36,16,'obj','arab');pickBox(MX,DY+8,MZ,8,17,14,'obj','museum');pickBox(PJX,PJY+3,PJZ,70,8,70,'obj','palm');pickBox(DX,DY+2,DZ,58,4,58,'obj','downtown');pickBox(EX+8,EY+2,EZ+5,50,8,40,'obj','beach');pickBox(HX,HY+4,HZ,30,10,30,'obj','homes');
   [['museum','Museum of the Future',[MX,DY+17.5,MZ]],['palm','Atlantis and the Palm',[PJX-20,city.palmTop+1.5,PJZ]],['arab','Burj Al Arab',[SX,arabTop+1.5,SZ]],['burj','Burj Khalifa',[BX,city.burjTop+2,BZ]],['downtown','Downtown',[DX+20,DY+6,DZ+20]],['beach','The beach',[EX,EY+4,EZ]],['homes','Homes',[HX,HY+16,HZ]]].forEach(q=>{
     const d=document.createElement('div');d.className='lab';d.innerHTML=`<button class="tagb obj" data-obj="${q[0]}"><span>${q[1]}</span></button>`;labelsEl.appendChild(d);OBJ[q[0]].lab=d;labs.push({el:d,pos:V(...q[2])});});
@@ -1989,6 +1991,7 @@ function init3D(){
     downtown:()=>({stats:[[cars.length,'Cars on the ring road'],[nightNow>.5?'On':'Daytime','Fountain show']],rows:[['Metro','Downtown station on the east side'],['Skyline',(18)+' towers around the Burj']]}),
     beach:()=>({stats:[[wx.rain>.5?'Raining':'Sunny','Beach weather'],['9','Umbrellas out']],rows:[['Sail hotel','On its own islet, linked by a bridge'],['Metro','Beach station on the east side']]}),
     homes:()=>({stats:[[agents.filter(a=>a.home).length,'Team members home'],[agents.filter(a=>!a.home).length,'At the office']],rows:[['Villas','8, each with a pool'],['Golden frame','On the south-east corner']]})};
+  function burjView(){const sm=stage.clientWidth<700;view.tx=BX;view.ty=BURJV.y+(sm?5:0);view.tz=BZ;view.dist=BURJV.d*(sm?1.14:1);view.pol=1.32;}
   function worldView(){view.tx=-22;view.ty=-6;view.tz=-16;view.dist=Math.min(maxDist(),240);view.pol=.95;}
 
   const bfw=[];let bfT=0;
@@ -2066,11 +2069,11 @@ function init3D(){
     if(dr.s==='in'||dr.s==='down')add('drone','A delivery arriving',drone.position.x,1.5,drone.position.z,10,2.4,drone);
     if(wx.rain>.5||wx.dust>.5||wx.mist>.5)add('sky',wx.rain>.5?'Rain over the island':wx.dust>.5?'Dust storm rolling in':'Morning mist',home.tx,home.ty,home.tz,home.dist*1.15,1.4);
     if(occ.cur!=='off'&&nightNow>.5)add('occ','Celebrating tonight',8.5,3,7,home.dist*1.05,1.3);
-    add('arab','Burj Al Arab',SX,SY+18,SZ,48,nightNow>.5?2:1.2);add('museum','Museum of the Future',MX,DY+9,MZ,40,nightNow>.5?1.8:1.2);add('palm','Palm Jumeirah',PJX-10,PJY+4,PJZ,95,1);if(city.led.uniforms.k.value>.3)add('burjled',bdayOn()?'Happy birthday, '+BDAY.name[0]+BDAY.name.slice(1).toLowerCase():'Burj Khalifa light show',CITY.burj[0],70,CITY.burj[2],150,3);add('burj','Burj Khalifa',CITY.burj[0],60,CITY.burj[2],170,nightNow>.5?2.2:1.3);add('downtown','Downtown traffic',CITY.dt[0],0,CITY.dt[2],70,1);
+    add('arab','Burj Al Arab',SX,SY+18,SZ,48,nightNow>.5?2:1.2);add('museum','Museum of the Future',MX,DY+9,MZ,40,nightNow>.5?1.8:1.2);add('palm','Palm Jumeirah',PJX-10,PJY+4,PJZ,95,1);if(city.led.uniforms.k.value>.3)add('burjled',bdayOn()?'Happy birthday, '+BDAY.name[0]+BDAY.name.slice(1).toLowerCase():'Burj Khalifa light show',CITY.burj[0],BURJV.y,CITY.burj[2],BURJV.d,3);add('burj','Burj Khalifa',CITY.burj[0],BURJV.y,CITY.burj[2],BURJV.d,nightNow>.5?2.2:1.3);add('downtown','Downtown traffic',CITY.dt[0],0,CITY.dt[2],70,1);
     if(metro.state==='run')add('metro','The sky metro',0,0,0,26,1.6,metro.cars[0]);add('beach','The beach and the sail hotel',CITY.beach[0],-4,CITY.beach[2],62,.9);
     return L;}
   function goShot(s){watch.shot=s;watch.last=s.id;watch.hist=(watch.hist||[]).concat(s.id).slice(-3);watch.endT=performance.now()+(s.id==='wide'||s.id==='sky'?8000:6500);watch.t=s.id==='wide'||s.id==='sky'?8:6.5;
-    view.tx=s.x;view.ty=s.y;view.tz=s.z;view.dist=s.d;view.pol=s.id==='sky'?.92:.86+Math.random()*.26;
+    view.tx=s.x;view.ty=s.y;view.tz=s.z;view.dist=s.d;view.pol=s.id==='sky'?.92:(s.id==='burj'||s.id==='burjled')?1.32:.86+Math.random()*.26;
     const base=.62+Math.round((cur.az-.62)/(Math.PI*2))*Math.PI*2;view.az=base+(Math.random()-.5)*1.7;
     const lt=document.getElementById('live-t');if(lt)lt.textContent=s.label;}
   function nextShot(){const L=shots();
@@ -2340,13 +2343,13 @@ function init3D(){
     return{status:cat.sleep>0?'Asleep on the café sofa':'Wandering the aisles',stats:[[staffLife.naps,'Naps today'],[cat.sleep>0?'Zzz':'Awake','Right now']],rows:[['Favourite spot','The café sofa'],['Job title','Head of morale']]};
   }
   function staffPos(id){const q=STAFF[id].p.g.position;return[q.x,q.z];}
-  return {world,worldView,staffInfo,staffPos,emote,setQuality,quality:()=>QUALITY,fxOn:()=>fxOn,watch:watchSet,watchOn:()=>watch.on,watchEvent,weatherSet,occSet,weatherK:()=>wx,audioMix,retheme,focusTarget,
+  return {world,worldView,burjView,staffInfo,staffPos,emote,setQuality,quality:()=>QUALITY,fxOn:()=>fxOn,watch:watchSet,watchOn:()=>watch.on,watchEvent,weatherSet,occSet,weatherK:()=>wx,audioMix,retheme,focusTarget,
     life,meeting,inCafe:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='table'||a.walk.kind==='coffee')).map(a=>a.name),inRoom:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind==='meeting').map(a=>a.name),
     setTod,todPhase,todAuto:b=>{todAuto=b;if(b)noonGoal=0;},noon:setNoon,night:()=>nightNow,drawScreens,ring,packet,confetti,cheer,ringBurst,setBeacon,snap,skipIntro:()=>{if(intro.on)endIntro();},introOn:()=>intro.on,fx:()=>fxOn};
 }
 function goHome(){view.tx=home.tx;view.ty=home.ty;view.tz=home.tz;view.dist=home.dist;view.pol=home.pol;}
-function flyTo(x,y,z,dist){
-  view.tx=x;view.ty=y;view.tz=z;view.dist=dist;view.pol=1.04;
+function flyTo(x,y,z,dist,pol){
+  view.tx=x;view.ty=y;view.tz=z;view.dist=dist;view.pol=pol||1.04;
   const a=((view.az+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI; view.az+=clamp(a,-.75,.75)-a;
 }
 
@@ -2408,7 +2411,7 @@ function openPanel(kind,id){
   if(G&&G.watchOn())G.watch(false);
   if(kind==='staff'){if(G){const q=G.staffPos(id);G.ring.visible=true;G.ring.position.set(q[0],.03,q[1]);flyTo(q[0],.5,q[1],SMALL?8:9.5);}paintPanelDec();updatePanel();panel.scrollTop=0;return;}
   const t=kind==='agent'?A[id]:OBJ[id]; if(t.lab)t.lab.classList.add('sel');
-  if(G){G.ring.visible=true; if(kind==='agent'){G.ring.position.set(t.x,.03+(t.h||0),t.y-.3);flyTo(t.x,.55,t.y-.3,SMALL?10:13);}else if(t.far){G.ring.visible=false;flyTo(t.x,t.h,t.y,t.far);}else{G.ring.visible=!t.big;G.ring.position.set(t.x,.03,t.y);flyTo(t.x,.6,t.y,t.big?(SMALL?14:17):(SMALL?10:13));}}
+  if(G){G.ring.visible=true; if(kind==='agent'){G.ring.position.set(t.x,.03+(t.h||0),t.y-.3);flyTo(t.x,.55,t.y-.3,SMALL?10:13);}else if(t.far){G.ring.visible=false;flyTo(t.x,t.h,t.y,t.far,t.pol);}else{G.ring.visible=!t.big;G.ring.position.set(t.x,.03,t.y);flyTo(t.x,.6,t.y,t.big?(SMALL?14:17):(SMALL?10:13));}}
   paintPanelDec(); updatePanel(); panel.scrollTop=0;
 }
 function closePanel(){sel=null;panel.hidden=true;labelsEl.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));if(G){G.ring.visible=false;goHome();}}
@@ -2625,6 +2628,7 @@ document.addEventListener('click',e=>{
   if((n=t.closest('[data-occ]'))){if(G)G.occSet(n.dataset.occ);document.querySelectorAll('[data-occ]').forEach(b=>b.setAttribute('aria-pressed',String(b===n)));return;}
   if((n=t.closest('[data-q]'))){if(G)G.setQuality(n.dataset.q);document.querySelectorAll('[data-q]').forEach(b=>b.setAttribute('aria-pressed',String(b===n)));return;}
   if(t.closest('#themeBtn')){closeMenu();openThemer();return;}
+  if(t.closest('#burjBtn')){closeMenu();if(sel)closePanel();if(tour>=0)tourStop();if(G){if(G.watchOn())G.watch(false);G.burjView();}return;}
   if(t.closest('#worldBtn')){closeMenu();if(sel)closePanel();if(tour>=0)tourStop();if(G){if(G.watchOn())G.watch(false);G.worldView();}return;}
   if(t.closest('#th-close')){$('#themer').hidden=true;return;}
   if(t.closest('#th-apply')){readThemer();saveTheme();toast('Theme applied');return;}

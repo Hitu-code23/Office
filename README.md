@@ -54,6 +54,8 @@ The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, wea
 
 `?live=1` switches the office from the demo to the real pipeline. Numbers, the activity feed, the meetings list and the Booking Tower come from the `velorien-office` Supabase project, refreshed every 20 seconds. New leads, emails and bookings animate in the office as they happen.
 
+A scheduled task, *Velorien daily lead run*, runs every weekday at 8:39 am Dubai time. It finds a few new leads, checks them, and writes short emails as **Gmail drafts** (it never sends). In live mode, the *Needs you* tray shows how many are waiting, with a button that opens Gmail. Once you send them, the next run marks them as Emailed, and it also picks up replies.
+
 The page can only read counts and anonymous labels such as "Salon · JVC" through one database function, `office_public()`. Business names, emails and phone numbers never reach the browser. The normal link (without `?live=1`) keeps showing the demo.
 
 ## Editing the Client Street shops

@@ -2,7 +2,7 @@
 
 An interactive 3D concept demo by **[Velorien Creative Studio](https://velorienstudiocreative.com/)**, Dubai.
 
-Seventeen AI agents in six teams (Scouts, Research, Writers, Sending, Replies, Booking), led by Director Harsh, work a lead pipeline from *Found* to *Booked*. The office floats in a sky city inspired by Dubai.
+Seventeen AI agents in six teams (Scouts, Research, Writers, Sending, Replies, Booking), led by Director Harsh, work a lead pipeline from *Found* to *Booked*, in an office on a floating island at sunset.
 
 **Live demo:** https://hitu-code23.github.io/Office/
 
@@ -11,11 +11,9 @@ Seventeen AI agents in six teams (Scouts, Research, Writers, Sending, Replies, B
 ## What you can do
 
 - **Watch the pipeline:** leads fly between the teams as glowing cubes, and bookings set off a celebration.
-- **Tap anyone or anything:** agents, staff, the café, the Lead Vault and city landmarks each have their own card.
-- **Explore the city:** Burj Khalifa, Burj Al Arab, Museum of the Future, the Dubai Frame, Palm Jumeirah with Atlantis, the beach, modern villas and the sky metro.
+- **Tap anyone or anything:** agents, staff, the café, the meeting room and the Lead Vault each have their own card.
 - **Change the mood:** a day-to-night slider, midday sun, weather (rain, dust storm, mist), and occasions (UAE National Day, Ramadan, Eid, Diwali).
 - **Watch mode:** the camera cuts between live shots by itself.
-- **Mini-map:** tap any island to fly there.
 - **Client theme:** rebrand the office (name, colours, logo, names) and download a branded copy.
 
 ## Controls
@@ -26,7 +24,7 @@ Seventeen AI agents in six teams (Scouts, Research, Writers, Sending, Replies, B
 | Zoom | Scroll | Pinch |
 | Select | Click | Tap |
 
-The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, weather, occasions, the camera views, the activity feed and the mini-map.
+The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, weather, occasions, camera controls and the activity feed.
 
 ## Link options
 
@@ -34,7 +32,6 @@ The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, wea
 | --- | --- |
 | `?lite=1` | Lighter build for slow devices |
 | `?fx=1` | Always use the full effects |
-| `?bday=1` | Replays the birthday show on the Burj Khalifa |
 
 ## Built with
 
@@ -42,5 +39,4 @@ A single `index.html` file: HTML, CSS and JavaScript with [Three.js](https://thr
 
 ## Notes
 
-- The landmarks are stylised interpretations made for this demo. They are not official models, and this project is not affiliated with their owners.
 - © Velorien Creative Studio. All rights reserved.

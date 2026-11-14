@@ -38,7 +38,7 @@ h1,h2,h3,p{margin:0}
 .fx.blur{-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;transition:opacity .6s;
   -webkit-mask-image:radial-gradient(circle at var(--fx,50%) var(--fy,50%),transparent 0,transparent var(--fr,150px),#000 calc(var(--fr,150px) + 190px));
   mask-image:radial-gradient(circle at var(--fx,50%) var(--fy,50%),transparent 0,transparent var(--fr,150px),#000 calc(var(--fr,150px) + 190px))}
-.focus .fx.blur{opacity:1}
+.focus .fx.blur{opacity:0}
 .q-low .fx.blur{display:none}
 .glass{background:var(--glass);border:1px solid var(--edge);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 
@@ -237,8 +237,6 @@ h1,h2,h3,p{margin:0}
 .feedbox.on{opacity:1}
 #feed li:nth-child(n+2){display:none}
 .hud,.lab .tagb.obj{transition:opacity .9s}
-.idle .hud,.idle .lab .tagb.obj{opacity:0}
-.idle .hud>*{pointer-events:none}
 .photo #menu,.intro #menu{display:none}
 @media (max-width:820px){
   .hud-top{flex-wrap:wrap;gap:6px}

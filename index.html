@@ -680,6 +680,8 @@ let G=null, sel=null, speed=1, lastTouch=-1e9, hoverId=null, tour=-1, tourTeam=n
 const tone=(hex,t)=>{const n=parseInt(hex.slice(1),16),g=[0x9A,0x8F,0x98];return '#'+[n>>16,(n>>8)&255,n&255].map((v,i)=>Math.round(v+(g[i]-v)*t).toString(16).padStart(2,'0')).join('');};
 for(const k in T)T[k].color=tone(T[k].color,.34);
 
+const BDAY={name:'ROVIN',from:Date.UTC(2026,10,14,8,49),to:Date.UTC(2026,10,14,18,49)};
+function bdayOn(){const d=Date.now();return (d>=BDAY.from&&d<BDAY.to)||/[?&]bday=1/.test(location.search);}
 function init3D(){
   const T3=window.THREE; if(!T3)throw new Error('Three.js did not load');
   const renderer=new T3.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -1595,17 +1597,29 @@ function init3D(){
       y+=h;}
     [[1.85,6],[1.5,5],[1.15,5]].forEach(q=>{b.prism(poly(6,q[0],Math.PI/6),y,y+q[1],BX,BY+Y0,BZ);y+=q[1];});
     const bm=b.mesh(GLASS.burj);
+    const bdC=document.createElement('canvas');bdC.width=512;bdC.height=2048;const bdTex=new T3.CanvasTexture(bdC);bdTex.wrapT=T3.RepeatWrapping;
+    function bdDraw(){const g=bdC.getContext('2d');g.clearRect(0,0,512,2048);g.textAlign='center';g.textBaseline='middle';
+      ['HAPPY','BIRTHDAY',BDAY.name].forEach((w,i)=>{const cy=i*512+256;let fs=300;const F=x=>`700 ${x}px Kanit,"Arial Black",sans-serif`;g.font=F(fs);const wd=g.measureText(w).width;if(wd>470){fs=fs*470/wd;g.font=F(fs);}
+        const gr=g.createLinearGradient(0,cy-fs/2,0,cy+fs/2);gr.addColorStop(0,'#FFF6D2');gr.addColorStop(1,i===2?'#FF8AD8':'#FFC24A');
+        g.shadowColor=i===2?'#FF4FB8':'#FFB020';g.shadowBlur=10;g.fillStyle=gr;g.fillText(w,256,cy);g.shadowBlur=0;g.fillText(w,256,cy);});
+      g.save();g.translate(256,3*512+262);g.scale(9,9);g.beginPath();for(let k=0;k<=126;k++){const t=k/20,x=16*Math.pow(Math.sin(t),3),y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));k?g.lineTo(x,y):g.moveTo(x,y);}g.closePath();g.restore();
+      g.shadowColor='#FF3FA0';g.shadowBlur=34;g.fillStyle='#FF6CBC';g.fill();g.shadowBlur=0;g.fill();bdTex.needsUpdate=true;}
+    bdDraw();if(document.fonts&&document.fonts.load)document.fonts.load('700 200px Kanit').then(bdDraw).catch(()=>{});
     const ledMat=new T3.ShaderMaterial({transparent:true,depthWrite:false,blending:T3.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4,
-      uniforms:{t:{value:0},k:{value:0},mode:{value:0},y0:{value:BY},y1:{value:BY+Y0+y}},
+      uniforms:{t:{value:0},k:{value:0},mode:{value:0},y0:{value:BY},y1:{value:BY+Y0+y},txt:{value:bdTex}},
       vertexShader:'varying vec3 wp;void main(){vec4 w=modelMatrix*vec4(position,1.);wp=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-      fragmentShader:`uniform float t,k,mode,y0,y1;varying vec3 wp;
+      fragmentShader:`uniform float t,k,mode,y0,y1;uniform sampler2D txt;varying vec3 wp;
         vec3 hsv(float h){return clamp(abs(mod(h*6.+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.);}
         void main(){float h=(wp.y-y0)/(y1-y0),a=atan(wp.z-(${BZ.toFixed(1)}),wp.x-(${BX.toFixed(1)}));vec3 c;
           if(mode<.5){c=hsv(fract(h*1.4-t*.22))*(.55+.45*sin(h*46.-t*7.));}
           else if(mode<1.5){float b=fract(h*2.5-t*.25);c=b<.33?vec3(0.,.62,.27):b<.66?vec3(1.):vec3(.04);c=mix(c,vec3(.93,.1,.13),step(.8,fract(a*.4775+t*.18)));}
           else if(mode<2.5){float sp=step(.9,fract(sin(dot(floor(wp*2.5),vec3(12.9,78.2,37.7)))*43758.5+t*1.7));c=vec3(1.,.62,.18)*.55+vec3(1.,.9,.6)*sp;}
           else if(mode<3.5){c=mix(vec3(.08,.72,.62),vec3(1.,.8,.3),.5+.5*sin(h*22.+t*3.));}
-          else{float p=.5+.5*sin(a*3.+h*14.-t*2.6);c=mix(vec3(.5,.36,1.),vec3(.95,.92,1.),p*p*.7);}
+          else if(mode<4.5){float p=.5+.5*sin(a*3.+h*14.-t*2.6);c=mix(vec3(.5,.36,1.),vec3(.95,.92,1.),p*p*.7);}
+          else{vec2 cc=vec2(${BX.toFixed(1)},${BZ.toFixed(1)}),vd=normalize(cameraPosition.xz-cc),rt=vec2(vd.y,-vd.x);float rad=max(2.2,9.6*(1.-h*1.12));
+            float u=dot(wp.xz-cc,rt)/(2.*rad)+.5,v=fract((wp.y-y0)/64.-t*.045);vec4 tx=texture2D(txt,vec2(clamp(u,0.,1.),v));
+            float sp=step(.93,fract(sin(dot(floor(wp*2.2),vec3(12.9,78.2,37.7)))*43758.5+t*1.3));
+            c=mix(vec3(.30,.14,.7),vec3(.8,.22,.5),.5+.5*sin(h*9.-t*1.4))*.16+vec3(1.,.85,.45)*sp*.22;float ta=smoothstep(.25,.75,tx.a)*step(0.,u)*step(u,1.);c=mix(c,tx.rgb*.72,ta);}
           gl_FragColor=vec4(c*k,1.);}`});
     const led=new T3.Mesh(bm.geometry,ledMat);led.renderOrder=3;led.frustumCulled=false;scene.add(led);city.led=ledMat;city.ledT=0;city.ledMode=0;
     const steel=new T3.MeshStandardMaterial({color:0xD0DAE3,metalness:.9,roughness:.2});glassMats.push(steel);steel.userData.lit=0;
@@ -1977,7 +1991,29 @@ function init3D(){
     homes:()=>({stats:[[agents.filter(a=>a.home).length,'Team members home'],[agents.filter(a=>!a.home).length,'At the office']],rows:[['Villas','8, each with a pool'],['Golden frame','On the south-east corner']]})};
   function worldView(){view.tx=-22;view.ty=-6;view.tz=-16;view.dist=Math.min(maxDist(),240);view.pol=.95;}
 
+  const bfw=[];let bfT=0;
+  for(let k=0;k<(LITE?5:10);k++){const N=LITE?90:160,p=new Float32Array(N*3),g=new T3.BufferGeometry();g.setAttribute('position',new T3.BufferAttribute(p,3));
+    const m=new T3.Points(g,new T3.PointsMaterial({map:glowTex,size:LITE?1.7:2.2,transparent:true,opacity:0,blending:T3.AdditiveBlending,depthWrite:false,fog:false,toneMapped:false}));
+    m.frustumCulled=false;m.visible=false;scene.add(m);bfw.push({m,p,v:new Float32Array(N*3),t:9,N,ex:true});}
+  const BFC=[0xFFD24A,0xFF5FB4,0x8B6CFF,0xFFFFFF,0x5FE3FF,0xFF8A3D];
+  function bLaunch(){const f=bfw.find(q=>q.t>2.6);if(!f)return;const a=Math.random()*6.283,r=16+Math.random()*26;
+    f.x=BX+Math.cos(a)*r;f.z=BZ+Math.sin(a)*r;f.y0=BY+1;f.by=BY+38+Math.random()*(city.burjTop-BY-40);f.rise=.9+Math.random()*.5;f.t=-f.rise;f.ex=false;
+    f.heart=Math.random()<.3;f.m.material.color.setHex(f.heart?0xFF5FB4:pick(BFC));f.m.material.size=(LITE?1.7:2.2);f.m.visible=true;}
+  function bTick(dt,live){if(!bdayOn()){bfw.forEach(f=>{f.m.visible=false;f.t=9;});return;}
+    if(live){bfT-=dt;if(bfT<=0){bfT=.3+Math.random()*.6;bLaunch();if(Math.random()<.15){bLaunch();bLaunch();}}}
+    for(const f of bfw){if(f.t>2.6){f.m.visible=false;continue;}if(live)f.t+=dt;const P=f.p;
+      if(f.t<0){const k=1+f.t/f.rise,e=1-(1-k)*(1-k),y=f.y0+(f.by-f.y0)*e;for(let i=0;i<f.N;i++){P[i*3]=f.x;P[i*3+1]=y-(i%24)*.12;P[i*3+2]=f.z;}
+        f.m.material.opacity=.55;f.m.material.size=.9;}
+      else{if(!f.ex){f.ex=true;f.m.material.size=(LITE?1.7:2.2);const ang=Math.atan2(camera.position.x-f.x,camera.position.z-f.z),rx=Math.cos(ang),rz=-Math.sin(ang),sp=7+Math.random()*4;
+          for(let i=0;i<f.N;i++){let vx,vy,vz;if(f.heart){const t=i/f.N*6.283,hx=16*Math.pow(Math.sin(t),3),hy=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t),q=sp*.055;vx=rx*hx*q;vz=rz*hx*q;vy=hy*q;}
+            else{const u=Math.random()*6.283,w=Math.acos(2*Math.random()-1),m2=sp*(.85+Math.random()*.25);vx=Math.sin(w)*Math.cos(u)*m2;vy=Math.cos(w)*m2;vz=Math.sin(w)*Math.sin(u)*m2;}
+            f.v[i*3]=vx;f.v[i*3+1]=vy;f.v[i*3+2]=vz;P[i*3]=f.x;P[i*3+1]=f.by;P[i*3+2]=f.z;}
+          if(typeof snd!=='undefined'&&cur.dist<260)snd.pop();}
+        if(live){const dr=Math.max(0,1-1.3*dt);for(let i=0;i<f.N;i++){f.v[i*3]*=dr;f.v[i*3+1]=f.v[i*3+1]*dr-2.4*dt;f.v[i*3+2]*=dr;P[i*3]+=f.v[i*3]*dt;P[i*3+1]+=f.v[i*3+1]*dt;P[i*3+2]+=f.v[i*3+2]*dt;}}
+        f.m.material.opacity=Math.max(0,1-f.t/2.6)*(f.t<.08?1:.95);}
+      f.m.geometry.attributes.position.needsUpdate=true;}}
   function cityTick(dt,tt,n,live){
+    bTick(dt,live);
     envT-=dt;if(envT<=0){envT=Math.abs(noonGoal-noonK)>.02?.4:(LITE?9:5);if(Math.abs(n-envN)>.025||envN<0||Math.abs(noonK-envNoon)>.05)refreshEnv(n);}
     for(const m of glassMats)if(m.userData.lit)m.emissiveIntensity=n*1.25*m.userData.lit;
     aviation.material.opacity=n>.25?(Math.sin(tt*3.2)>.2?.95:.08):.25;
@@ -1988,7 +2024,7 @@ function init3D(){
     /* Burj Khalifa LED show: a 20 s show every 70 s after dark, themed for the occasion */
     {city.ledT+=dt;const cyc=Math.floor(city.ledT/70),on=n>.55&&(city.ledT%70)<20;
       if(cyc!==city.ledC){city.ledC=cyc;city.ledMode={nationalday:1,diwali:2,eid:3,ramadan:3}[occ.cur]!=null?{nationalday:1,diwali:2,eid:3,ramadan:3}[occ.cur]:(cyc%2?4:0);}
-      city.led.uniforms.k.value+=((on?.85:0)-city.led.uniforms.k.value)*Math.min(1,dt*1.2);city.led.uniforms.t.value=tt;city.led.uniforms.mode.value=city.ledMode;}
+      const bd=bdayOn();if(bd)city.ledMode=5;else if(city.ledMode===5)city.ledMode=4;city.led.uniforms.k.value+=((bd?.9:on?.85:0)-city.led.uniforms.k.value)*Math.min(1,dt*1.2);city.led.uniforms.t.value=tt;city.led.uniforms.mode.value=city.ledMode;}
     for(const m of waterMats){m.normalMap.offset.x=tt*.012;m.normalMap.offset.y=tt*.007;}
     city.museumMat.emissiveIntensity=n*.9;city.palmLights.material.opacity=.04+n*.92;city.villaGlass.emissiveIntensity=.08+n*.7;city.villaPool.emissiveIntensity=.3+n*.75;city.villaLights.material.opacity=.05+n*.9;city.atlArch.emissiveIntensity=.15+n*.42;city.atlGold.emissiveIntensity=n*.6;
     lifeTick(dt,tt,n,live);
@@ -2030,7 +2066,7 @@ function init3D(){
     if(dr.s==='in'||dr.s==='down')add('drone','A delivery arriving',drone.position.x,1.5,drone.position.z,10,2.4,drone);
     if(wx.rain>.5||wx.dust>.5||wx.mist>.5)add('sky',wx.rain>.5?'Rain over the island':wx.dust>.5?'Dust storm rolling in':'Morning mist',home.tx,home.ty,home.tz,home.dist*1.15,1.4);
     if(occ.cur!=='off'&&nightNow>.5)add('occ','Celebrating tonight',8.5,3,7,home.dist*1.05,1.3);
-    add('arab','Burj Al Arab',SX,SY+18,SZ,48,nightNow>.5?2:1.2);add('museum','Museum of the Future',MX,DY+9,MZ,40,nightNow>.5?1.8:1.2);add('palm','Palm Jumeirah',PJX-10,PJY+4,PJZ,95,1);if(city.led.uniforms.k.value>.3)add('burjled','Burj Khalifa light show',CITY.burj[0],70,CITY.burj[2],150,3);add('burj','Burj Khalifa',CITY.burj[0],60,CITY.burj[2],170,nightNow>.5?2.2:1.3);add('downtown','Downtown traffic',CITY.dt[0],0,CITY.dt[2],70,1);
+    add('arab','Burj Al Arab',SX,SY+18,SZ,48,nightNow>.5?2:1.2);add('museum','Museum of the Future',MX,DY+9,MZ,40,nightNow>.5?1.8:1.2);add('palm','Palm Jumeirah',PJX-10,PJY+4,PJZ,95,1);if(city.led.uniforms.k.value>.3)add('burjled',bdayOn()?'Happy birthday, '+BDAY.name[0]+BDAY.name.slice(1).toLowerCase():'Burj Khalifa light show',CITY.burj[0],70,CITY.burj[2],150,3);add('burj','Burj Khalifa',CITY.burj[0],60,CITY.burj[2],170,nightNow>.5?2.2:1.3);add('downtown','Downtown traffic',CITY.dt[0],0,CITY.dt[2],70,1);
     if(metro.state==='run')add('metro','The sky metro',0,0,0,26,1.6,metro.cars[0]);add('beach','The beach and the sail hotel',CITY.beach[0],-4,CITY.beach[2],62,.9);
     return L;}
   function goShot(s){watch.shot=s;watch.last=s.id;watch.hist=(watch.hist||[]).concat(s.id).slice(-3);watch.endT=performance.now()+(s.id==='wide'||s.id==='sky'?8000:6500);watch.t=s.id==='wide'||s.id==='sky'?8:6.5;

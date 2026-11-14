@@ -630,7 +630,7 @@ const A={}, agents=AG.map((r,i)=>{
 });
 const OBJ={vault:{x:15.6,y:2},brain:{x:16,y:4.3},meet:{x:14.3,y:8.7}};
 /* the birthday island in front of the gate: her name and birthday (MM-DD, Dubai date) */
-const BDAY={name:'Meher',date:'11-16'};
+const BDAY={name:'Mehria',date:'11-16'};
 
 /* LIVE DATA is the default: the page shows the real pipeline from Supabase. Add ?demo=1 to see the simulated demo instead. */
 let liveStats=null;
@@ -3316,7 +3316,7 @@ function bdayTune(){try{const C=window.AudioContext||window.webkitAudioContext;i
   let tb=t+.75*bt;BASS.forEach(([n0,b0])=>{play(N[n0]/4,tb,b0*bt,[[1,'triangle',.22],[2,'sine',.05]]);tb+=b0*bt;});
   S.forEach(([n0,b0])=>{const d=b0*bt;play(N[n0],t,d,[[1,'sine',.5],[2,'sine',.12],[3,'triangle',.05],[4,'sine',.025]]);t+=d;});}catch(_){}}
 function bdayGo(withTune){if(!G||!G.bday)return;if(G.watchOn())G.watch(false);if(tour>=0)tourStop(true);if(sel)dropSel();
-  const p=G.bdayAt;flyTo(p[0],SMALL?2.6:p[1],SMALL?p[2]+1.5:p[2],SMALL?44:27,SMALL?.98:1.0);{const g=SMALL?.12:.24,d=((g-view.az)%6.2832+9.4248)%6.2832-3.1416;view.az+=d;}G.bday();if(withTune)bdayTune();lastTouch=performance.now();}
+  const p=G.bdayAt;flyTo(p[0],SMALL?2.6:p[1],SMALL?p[2]+1.5:p[2],SMALL?52:27,SMALL?.98:1.0);{const g=SMALL?.12:.24,d=((g-view.az)%6.2832+9.4248)%6.2832-3.1416;view.az+=d;}G.bday();if(withTune)bdayTune();lastTouch=performance.now();}
 /* a link that opens straight on the party: add #birthday to the address */
 if(/#birthday|[?&]birthday(=|&|$)/.test(location.href)){let tuned=false;const w=setInterval(()=>{if(!G)return;if(G.introOn&&G.introOn()){if(G.skipIntro)G.skipIntro();return;}clearInterval(w);setTimeout(()=>bdayGo(false),400);},300);
   const once=()=>{if(tuned)return;tuned=true;bdayTune();};document.addEventListener('pointerdown',once,{once:true});document.addEventListener('keydown',once,{once:true});}

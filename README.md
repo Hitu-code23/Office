@@ -14,6 +14,7 @@ Twenty-seven AI agents in nine teams, led by Director Harsh, work in a two-floor
 - **Tap anyone or anything:** agents, staff, the café, the meeting room, the Lead Vault, the client lounge, the chill zone and the terrace each have their own card.
 - **Explore the office:** a client lounge with a big screen showing new websites, a chill zone with ping pong, beanbags and an arcade, and a terrace with a lit pool and loungers. Upstairs: the Marketing team, a content studio, a gym and a dining hall, reached by stairs. Out front: a gate, driveway, parking and a fountain garden.
 - **Change the mood:** a day-to-night slider, midday sun, weather (rain, dust storm, mist), and occasions (UAE National Day, Ramadan, Eid, Diwali).
+- **Glass roof:** when rain starts, glass louvers over the building tilt shut one after another and keep the office dry. They open again when it clears.
 - **Watch mode:** the camera cuts between live shots by itself.
 - **Client theme:** rebrand the office (name, colours, logo, names) and download a branded copy.
 

@@ -23,6 +23,9 @@ Twenty-seven AI agents in nine teams, led by Director Harsh, work in a three-flo
 - **Realistic details:** smooth cars with tinted glass, alloy wheels and lights; people with rounded heads, eight hair styles, shoes and knees that bend as they walk and sit; glass and car paint that reflect the world around them; a pool that mirrors the sky, ripples in the wind, shows light patterns on its floor and glows at night.
 - **Wind and storms:** before rain the wind picks up, so trees bend, the flags at the gate flap and the pool ripples. Heavy rain brings lightning and thunder.
 - **Hidden roof:** it lives underground. When rain starts, posts and beams rise out of the floor and glass slides across the top to keep the office dry. When the rain stops, it slides back and sinks out of sight.
+- **Getting around:** the menu's *Go to* buttons fly to the office, the academy, Client Street, the beach or the marina. Labels show only when you are close (or always, or off). The tour is split into three chapters, one per island.
+- **Bookings you can see:** when a meeting is booked, a spark flies from the Booking desk to the Booking Tower and lights the next floor.
+- **Island sounds:** with sound on, you hear waves near the water, the crowd at the stage, the hum of the power tower and balls being hit on the courts, louder as you get close.
 - **Watch mode:** the camera cuts between live shots by itself.
 - **Build your own office:** rebrand it (name, colour, logo, team names), then copy a share link that opens the office with that brand, or download a branded copy.
 

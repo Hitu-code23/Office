@@ -13,10 +13,13 @@ Twenty-seven AI agents in nine teams, led by Director Harsh, work in a two-floor
 - **Watch the pipeline:** leads fly between the teams as glowing cubes, and bookings set off a celebration.
 - **Tap anyone or anything:** agents, staff, the café, the meeting room, the Lead Vault, the client lounge, the chill zone and the terrace each have their own card.
 - **Explore the office:** a client lounge with a big screen showing new websites, a chill zone with ping pong, beanbags and an arcade, and a terrace with a lit pool and loungers. Upstairs: the Marketing team, a content studio, a gym and a dining hall, reached by stairs. Out front: a gate, driveway, parking and a fountain garden.
-- **Change the mood:** a day-to-night slider, midday sun, weather (rain, dust storm, mist), and occasions (UAE National Day, Ramadan, Eid, Diwali).
+- **Office life:** clients arrive by car and are shown to the lounge, birthday cake and a team photo, a Friday pizza drone, a night guard with a torch and a cleaning robot. Writers look stressed when replies are slow, and the whole floor cheers when a meeting is booked.
+- **More spaces:** a helipad on a glass deck above the studio (reached by a glass lift, where a helicopter lands now and then), a podcast booth, a server room that flashes when emails go out, a library upstairs and a kids' corner in the lounge.
+- **Change the mood:** a day-to-night slider, midday sun, weather (rain, dust storm, mist), and occasions (UAE National Day, Ramadan with an iftar table, Eid, Diwali, autumn leaves, a Christmas tree in reception). Occasions switch on by date.
+- **Wind and storms:** before rain the wind picks up, so trees bend, the flags at the gate flap and the pool ripples. Heavy rain brings lightning and thunder.
 - **Hidden roof:** it lives underground. When rain starts, posts and beams rise out of the floor and glass slides across the top to keep the office dry. When the rain stops, it slides back and sinks out of sight.
 - **Watch mode:** the camera cuts between live shots by itself.
-- **Client theme:** rebrand the office (name, colours, logo, names) and download a branded copy.
+- **Build your own office:** rebrand it (name, colour, logo, team names), then copy a share link that opens the office with that brand, or download a branded copy.
 
 ## Controls
 
@@ -34,6 +37,7 @@ The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, wea
 | --- | --- |
 | `?lite=1` | Lighter build for slow devices |
 | `?fx=1` | Always use the full effects |
+| `#office=…` | Opens a branded office (made with Copy share link) |
 
 ## Built with
 

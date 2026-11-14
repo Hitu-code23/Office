@@ -3136,15 +3136,18 @@ function init3D(){
     let bigNow=isBday(),momentFired=false,cdTimer=0;
 
     /* a glowing countdown sign on top of the balloon arch */
-    const cdn=signMesh(768,210,3.5,.96,14.8,5.66,32.3);cdn.m.material.depthWrite=false;cdn.m.visible=false;
-    const cdGlow=halo(14.8,5.62,32.18,0xFF7FB5,3.4);cdGlow.material.opacity=.32;cdGlow.visible=false;
-    let cdKey='';
+    const cdn=signMesh(1024,280,6.2,1.7,14.8,6.0,32.36);cdn.m.material.depthWrite=false;cdn.m.visible=false;
+    const cdGlow=halo(14.8,5.95,32.2,0xFF7FB5,6.2);cdGlow.material.opacity=.36;cdGlow.visible=false;
+    let cdKey='',tagSpan=null;
     function drawCountdown(){const left=momentAt()-Date.now();let a='',b2='';
       if(left>0&&left<48*3600e3){a='the party starts in';b2=hms(left);}else if(bigNow){a='today we celebrate';b2=BDN.toUpperCase();}
-      const key=a+'|'+b2;if(key===cdKey)return;cdKey=key;cdn.m.visible=cdGlow.visible=!!a;if(!a)return;
-      const c=cdn.g;c.clearRect(0,0,768,210);rrect(c,8,8,752,194,44);c.fillStyle='rgba(46,16,56,.93)';c.fill();c.lineWidth=7;c.strokeStyle='#F6D27A';c.stroke();
-      c.textAlign='center';c.textBaseline='middle';c.fillStyle='#FFC2DA';c.font='600 40px Kanit,system-ui,sans-serif';c.fillText(a,384,56);
-      c.shadowColor='#FF5FA8';c.shadowBlur=18;c.fillStyle='#FFE6A0';c.font='700 92px "Pixelify Sans","Courier New",monospace';c.fillText(b2,384,138);c.shadowBlur=0;cdn.t.needsUpdate=true;}
+      const key=a+'|'+b2;if(key===cdKey)return;cdKey=key;cdn.m.visible=cdGlow.visible=!!a;
+      if(tagSpan)tagSpan.textContent=left>0&&left<48*3600e3?NAME+'’s party in '+b2:bigNow?'Happy Birthday '+BDN+' ♥':(NAME?NAME+'’s ':'')+'Birthday Island';
+      if(!a)return;
+      const c=cdn.g;c.clearRect(0,0,1024,280);rrect(c,10,10,1004,260,64);c.fillStyle='rgba(46,16,56,.94)';c.fill();c.lineWidth=10;c.strokeStyle='#F6D27A';c.stroke();
+      c.textAlign='center';c.textBaseline='middle';c.fillStyle='#FFC2DA';c.font='600 54px Kanit,system-ui,sans-serif';c.fillText(a,512,76);
+      c.shadowColor='#FF5FA8';c.shadowBlur=22;c.fillStyle='#FFE6A0';let fs=132;c.font='700 '+fs+'px "Pixelify Sans","Courier New",monospace';while(c.measureText(b2).width>930&&fs>50){fs-=6;c.font='700 '+fs+'px "Pixelify Sans","Courier New",monospace';}
+      c.fillText(b2,512,186);c.shadowBlur=0;cdn.t.needsUpdate=true;}
 
     /* ---- drone light show ---- */
     const DN=LITE?260:(SMALL?400:620),DW=SMALL?14:23,DC=new T3.Vector3(15,21.5,34),DAZ=SMALL?.12:.2,DRX=Math.cos(DAZ),DRZ=-Math.sin(DAZ),DFX=Math.sin(DAZ),DFZ=Math.cos(DAZ);
@@ -3214,16 +3217,17 @@ function init3D(){
     const plane=new T3.Group();plane.rotation.order='YXZ';plane.scale.setScalar(1.25);scene.add(plane);
     {const pm=new T3.Mesh(pb.geo(),litMat);pm.castShadow=!LITE;plane.add(pm);}
     const prop=new T3.Mesh(new T3.BoxGeometry(.04,.92,.1),new T3.MeshLambertMaterial({color:0x3A3242}));prop.position.set(1.2,0,0);plane.add(prop);
-    const BNL=7.4,BNH=1.0,BN0=2.5;
-    const banGeo=new T3.PlaneGeometry(BNL,BNH,28,1);banGeo.translate(-BN0-BNL/2,-.28,0);const banX=Float32Array.from(banGeo.attributes.position.array.filter((v,i)=>i%3===0));
-    const banTex=mirror=>{const c=document.createElement('canvas');c.width=1024;c.height=140;const x2=c.getContext('2d'),t=new T3.CanvasTexture(c);t.encoding=T3.sRGBEncoding;t.anisotropy=4;
-      const draw=()=>{x2.setTransform(1,0,0,1,0,0);if(mirror){x2.translate(1024,0);x2.scale(-1,1);}x2.fillStyle='#FFF8F2';x2.fillRect(0,0,1024,140);x2.fillStyle='#FF5FA0';x2.fillRect(0,0,1024,10);x2.fillRect(0,130,1024,10);
-        const txt=('Happy Birthday '+BDN+' ♥').toUpperCase();let fs=80;x2.font='800 '+fs+'px Kanit,system-ui,sans-serif';while(x2.measureText(txt).width>960&&fs>30){fs-=4;x2.font='800 '+fs+'px Kanit,system-ui,sans-serif';}
-        x2.fillStyle='#E2508A';x2.textAlign='center';x2.textBaseline='middle';x2.fillText(txt,512,74);t.needsUpdate=true;};
+    const BNL=13,BNH=1.6,BN0=2.7,BNY=-.35;
+    const banGeo=new T3.PlaneGeometry(BNL,BNH,36,1);banGeo.translate(-BN0-BNL/2,0,0);
+    const banG=new T3.Group();banG.position.y=BNY;plane.add(banG);let banSide=1;const CAM3=new T3.Vector3();const banX=Float32Array.from(banGeo.attributes.position.array.filter((v,i)=>i%3===0));
+    const banTex=mirror=>{const c=document.createElement('canvas');c.width=1024;c.height=126;const x2=c.getContext('2d'),t=new T3.CanvasTexture(c);t.encoding=T3.sRGBEncoding;t.anisotropy=8;
+      const draw=()=>{x2.setTransform(1,0,0,1,0,0);if(mirror){x2.translate(1024,0);x2.scale(-1,1);}x2.fillStyle='#FFF8F2';x2.fillRect(0,0,1024,126);x2.fillStyle='#FF5FA0';x2.fillRect(0,0,1024,9);x2.fillRect(0,117,1024,9);
+        const txt=('Happy Birthday '+BDN+' ♥').toUpperCase();let fs=96;x2.font='800 '+fs+'px Kanit,system-ui,sans-serif';while(x2.measureText(txt).width>990&&fs>30){fs-=3;x2.font='800 '+fs+'px Kanit,system-ui,sans-serif';}
+        x2.fillStyle='#D93A7C';x2.textAlign='center';x2.textBaseline='middle';x2.fillText(txt,512,66);t.needsUpdate=true;};
       draw();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);return t;};
-    plane.add(new T3.Mesh(banGeo,new T3.MeshLambertMaterial({map:banTex(false),side:T3.FrontSide})));
-    plane.add(new T3.Mesh(banGeo,new T3.MeshLambertMaterial({map:banTex(true),side:T3.BackSide})));
-    {const rg=new T3.BufferGeometry();rg.setAttribute('position',new T3.Float32BufferAttribute([-1.0,0,0,-BN0,-.28+BNH/2,0,-1.0,0,0,-BN0,-.28-BNH/2,0],3));plane.add(new T3.LineSegments(rg,new T3.LineBasicMaterial({color:0x6B5A70})));}
+    banG.add(new T3.Mesh(banGeo,new T3.MeshBasicMaterial({map:banTex(false),side:T3.FrontSide,toneMapped:false,fog:false})));
+    banG.add(new T3.Mesh(banGeo,new T3.MeshBasicMaterial({map:banTex(true),side:T3.BackSide,toneMapped:false,fog:false})));
+    {const rg=new T3.BufferGeometry();rg.setAttribute('position',new T3.Float32BufferAttribute([-1.0,0,0,-BN0,BNY,0],3));plane.add(new T3.LineSegments(rg,new T3.LineBasicMaterial({color:0x6B5A70})));}
     let planeT=Math.random()*40,lift=0;
 
     /* ---- a heart-shaped hot air balloon drifting around ---- */
@@ -3252,7 +3256,7 @@ function init3D(){
     /* the island tag and tap target */
     pickBox(KX,1.6,CZ,21,3.4,15,'bday','island');
     {const d=document.createElement('div');d.className='lab';d.innerHTML=`<button class="tagb obj bday" data-bday="1"><i style="background:#FF6FAE"></i><span>${NAME?NAME+'’s ':''}Birthday Island</span></button>`;
-      labelsEl.appendChild(d);labs.push({el:d,pos:V(KX,7.4,KZ+.6),oid:'bday'});}
+      labelsEl.appendChild(d);tagSpan=d.querySelector('span');labs.push({el:d,pos:V(6.6,4.2,33.4),oid:'bday'});}
 
     function tick(dt,n,tt,live){
       const big=isBday();
@@ -3320,8 +3324,11 @@ function init3D(){
       plane.visible=HB.visible=party;
       if(party){planeT+=dt;const a=planeT*.15,x=16+Math.cos(a)*33,z=14+Math.sin(a)*23,dx=-Math.sin(a)*33,dz=Math.cos(a)*23;
         plane.position.set(x,12.5+Math.sin(planeT*.5)*.6+lift,z);plane.rotation.y=Math.atan2(-dz,dx);plane.rotation.x=.2;prop.rotation.x+=dt*38;
-        const pa=banGeo.attributes.position.array;for(let i=0;i<banX.length;i++){const bx=banX[i],k=(-bx-BN0)/BNL;pa[i*3+2]=Math.sin(bx*1.4+planeT*8)*.2*k;}banGeo.attributes.position.needsUpdate=true;
-        hbT+=dt;const b3=-hbT*.05;HB.position.set(16+Math.cos(b3)*27,9.5+Math.sin(hbT*.4)*.5+lift*1.1,20+Math.sin(b3)*21);HB.rotation.y=Math.sin(hbT*.18)*.6;
+        const pa=banGeo.attributes.position.array;for(let i=0;i<banX.length;i++){const bx=banX[i],k=(-bx-BN0)/BNL;pa[i*3+2]=Math.sin(bx*1.1+planeT*7)*.16*k;}banGeo.attributes.position.needsUpdate=true;
+        /* turn the banner's face toward the camera (it swings around its own long edge), so the words are readable from above */
+        plane.updateMatrixWorld();CAM3.copy(camera.position);plane.worldToLocal(CAM3);{const dy=CAM3.y-BNY,dz=CAM3.z,r=Math.hypot(dy,dz)||1;
+          if(dz>.2*r)banSide=1;else if(dz<-.2*r)banSide=-1;const th=banSide>0?Math.atan2(-dy,Math.max(.05,dz)):Math.atan2(dy,Math.max(.05,-dz));banG.rotation.x=clamp(th,-1.3,1.3);}
+        hbT+=dt;const b3=-hbT*.05;HB.position.set(16+Math.cos(b3)*27,9.5+Math.sin(hbT*.4)*.5+lift*1.1,20+Math.sin(b3)*21);HB.rotation.y=Math.atan2(camera.position.x-HB.position.x,camera.position.z-HB.position.z)+Math.sin(hbT*.18)*.25;
         HB.userData.fl.material.opacity=.6+.4*Math.sin(hbT*9)*Math.sin(hbT*4.3);}
       cdTimer-=dt;if(cdTimer<=0){cdTimer=.25;drawCountdown();const left=momentAt()-Date.now();
         if(!momentFired&&left<=0&&left>-15*60e3){momentFired=true;window.dispatchEvent(new Event('bday:moment'));}if(left>0)momentFired=false;}

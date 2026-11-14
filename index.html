@@ -3063,7 +3063,7 @@ function paintNumbers(){
   [['found',S.found],['researched',S.researched],['sent',S.sent],['replied',S.replied],['booked',S.booked]].forEach(k=>{countTo($('#k-'+k[0]),k[1]);});
   if(!G)return;
   $('#t-vault').textContent=fmt(S.found)+' leads stored';
-  $('#t-brain').textContent=S.rules+' rules learned';
+  $('#t-brain').textContent=S.rules+(S.rules===1?' rule learned':' rules learned');
   $('#t-cafe').textContent=G.life.coffees+' coffees today';$('#t-room').textContent=G.life.room>0?'In use':'Free';$('#t-desk').textContent=agents.filter(a=>!a.home).length+' people in';
   const key=S.sent+'|'+S.replied+'|'+S.booked; if(key!==lastScreen){lastScreen=key;G.drawScreens();}
   G.setBeacon(S.booked);
@@ -3519,7 +3519,7 @@ if(LIVE.on){
   spawnDecision=function(){};forceBook=function(){};
   leads.length=0;meetings.length=0;feed.length=0;
   const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply'};
-  const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote a message for '+l,approved:l=>'Harsh approved the message for '+l,sent:l=>'Message sent to '+l,replied:l=>l+' replied',
+  const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote a message for '+l,approved:l=>'Approved the message for '+l,sent:l=>'Message sent to '+l,replied:l=>l+' replied',
     booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'A lead opened their preview: '+l};
   const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found',opened:'Warm'};
   const NEXT={scout:'research',research:'writer',writer:'sender',booker:null};
@@ -3539,7 +3539,7 @@ if(LIVE.on){
   const badge=ok=>{const b=$('#demoBadge');if(b)b.textContent=ok?'Live data · names hidden':'Live data · reconnecting…';};badge(true);
   async function poll(){if(document.hidden&&last!==null)return;
     try{const r=await fetch(LIVE.url+'/rest/v1/rpc/office_public',{method:'POST',headers:{apikey:LIVE.key,'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw new Error(r.status);const j=await r.json();
-      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened'].forEach(k=>{LV[k]=cn[k]||0;});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
+      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened'].forEach(k=>{LV[k]=cn[k]||0;});S.rules=cn.rules||0;rules.length=0;(j.rules||[]).forEach(r=>{if(r&&r.text)rules.push(String(r.text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
       /* emails ready to send wait in your Gmail drafts: one card in the Needs you tray */
       waiting=cn.waiting||0;{const i=decisions.findIndex(d=>d.live);
         if(waiting>0&&Date.now()>snooze){const t=waiting+' message'+(waiting>1?'s are':' is')+' ready to send';

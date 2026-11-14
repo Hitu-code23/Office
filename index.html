@@ -627,6 +627,7 @@ const A={}, agents=AG.map((r,i)=>{
 const OBJ={vault:{x:15.6,y:2},brain:{x:16,y:4.3},meet:{x:14.3,y:8.7}};
 
 /* LIVE DATA is the default: the page shows the real pipeline from Supabase. Add ?demo=1 to see the simulated demo instead. */
+let liveStats=null;
 const LIVE={url:'https://zomspykhwkyuyrvcqwaf.supabase.co',key:'sb_publishable_BVDwGw2jQyiK3w8ockp-5Q_gCd_9rOA',on:!/[?&](demo|live)=(1|0)(&|$)/.test(location.search)||/[?&]live=1(&|$)/.test(location.search),ok:false};
 const S={found:1840,researched:1512,drafted:1340,sent:1296,replied:87,booked:14,rules:42,live:9,reach:48200,reels:31};
 const B1=['Zephyra','Orbelle','Kalinth','Vantera','Mirabay','Sundoro','Tessaro','Nimbla','Corvessa','Halvora','Quillon','Brisane','Elmwick','Feyra','Lunaro'];
@@ -698,9 +699,9 @@ function resolve(id,opt){
   const i=decisions.findIndex(d=>d.id===id); if(i<0)return;
   const d=decisions.splice(i,1)[0], a=A[d.agent];
   if(d.effect)d.effect(opt);
-  const r=d.rule(opt); rules.unshift(r); if(rules.length>14)rules.pop(); S.rules++;
+  if(!d.live){const r=d.rule(opt); rules.unshift(r); if(rules.length>14)rules.pop(); S.rules++;}
   a.status='Got it: '+d.opts[opt]; a.done++;
-  pushFeed(a,'You chose “'+d.opts[opt]+'”. Saved to the Shared Brain.');
+  pushFeed(a,'You chose “'+d.opts[opt]+'”.'+(d.live?'':' Saved to the Shared Brain.'));
   toast(a.name+' is on it: '+d.opts[opt]);if(G)G.emote(a.id,'happy',3);
   onDecisionsChanged(); paintNumbers(); updatePanel();
 }
@@ -3147,17 +3148,17 @@ function updatePanel(){
       (f.rows.length?`<ul class="list" style="margin-top:14px">${f.rows.map(r=>`<li><span>${r[0]}</span><span>${r[1]}</span></li>`).join('')}</ul>`:'');return;}
   if(sel.kind==='agent'){
     const a=A[sel.id],waits=decisions.some(d=>d.agent===a.id),cls=a.paused?'paused':waits?'wait':'';
-    el.innerHTML=`<p class="status ${a.home?'paused':cls}"><i></i><span>${a.paused?'Paused':a.home?'Gone home for the night':a.status}</span></p>${workCard(a)}
+    el.innerHTML=`<p class="status ${a.home?'paused':cls}"><i></i><span>${a.paused?'Paused':a.home?'Gone home for the night':a.status}</span></p>${workCard(a)}${liveStats?liveStats(a):`
       <div class="stats"><div><b>${fmt(a.done)}</b><span>Tasks done</span></div><div><b>${a.rate}%</b><span>Success rate</span></div></div>
       <div class="spark"><p>Tasks in the last few minutes</p>${spark(a.hist)}</div>
-      <p class="sec">Latest work</p><ul class="list">${a.log.map(l=>`<li><span>${l.msg}</span><span>${l.t}</span></li>`).join('')||'<li><span>No work logged yet</span><span></span></li>'}</ul>`;
+      <p class="sec">Latest work</p><ul class="list">${a.log.map(l=>`<li><span>${l.msg}</span><span>${l.t}</span></li>`).join('')||'<li><span>No work logged yet</span><span></span></li>'}</ul>`}`;
     $('#p-pause').textContent=(a.paused?'Resume ':'Pause ')+a.name;
   }else if(sel.id==='vault'){
     el.innerHTML=`<div class="stats"><div><b>${fmt(S.found)}</b><span>Leads stored</span></div><div><b>${fmt(S.found-S.sent)}</b><span>Not emailed yet</span></div></div>
-      <p class="sec">Newest leads</p><ul class="list">${leads.slice(0,9).map(l=>`<li><span>${l.biz}, ${l.area}</span><span class="chip">${l.stage}</span></li>`).join('')}</ul>`;
+      <p class="sec">Newest leads</p><ul class="list">${leads.slice(0,9).map(l=>`<li><span>${l.biz}${l.area?', '+l.area:''}</span><span class="chip">${l.stage}</span></li>`).join('')}</ul>`;
   }else if(sel.id==='brain'){
-    el.innerHTML=`<div class="stats"><div><b>${S.rules}</b><span>Rules learned</span></div><div><b>17</b><span>Agents reading it</span></div></div>
-      <p class="sec">Newest rules. Your decisions land here.</p><ul class="list">${rules.slice(0,9).map(r=>`<li><span>${r}</span><span></span></li>`).join('')}</ul>`;
+    el.innerHTML=`<div class="stats"><div><b>${S.rules}</b><span>Rules learned</span></div>${LIVE.on?`<div><b>${S.tests||0}</b><span>Tests running</span></div>`:'<div><b>17</b><span>Agents reading it</span></div>'}</div>
+      <p class="sec">${LIVE.on?'What the team follows, and the tests it is running.':'Newest rules. Your decisions land here.'}</p><ul class="list">${rules.slice(0,9).map(r=>`<li><span>${r}</span><span></span></li>`).join('')}</ul>`;
   }else if(sel.id==='cafe'){const who=G?G.inCafe():[];
     el.innerHTML=`<div class="stats"><div><b>${G?G.life.coffees:0}</b><span>Coffees served today</span></div><div><b>${who.length}</b><span>In the café now</span></div></div>
       <p class="sec">On a break</p><ul class="list">${who.map(n=>`<li><span>${n}</span><span></span></li>`).join('')||'<li><span>Nobody right now. It fills up around midday.</span><span></span></li>'}</ul>`;
@@ -3222,7 +3223,7 @@ function tick(silent){
   const talkers=[];
   agents.forEach(a=>{
     if(a.paused||a.home||decisions.some(d=>d.agent===a.id)||!chance(.5))return;
-    const r=ACT[a.kind](); a.status=r[0]; a.done++; a.bucket++;
+    const r=ACT[a.kind](); if(LIVE.on){a.status=r[0];return;} a.status=r[0]; a.done++; a.bucket++;
     say(a,r[0],r[1]); setItem(a,r[0]); if(!r[1])talkers.push([a,r[0]]);
     if(!silent){flow(a,r[1]);if(r[1]&&a.kind==='book'){celebrate();sinceBook=0;}
       if(r[1]&&a.kind==='sort'&&G){if(/already|not now|thanks”/.test(r[0]))G.emote(a.id,'sad',3.5);else G.cheer(a.id);}
@@ -3512,12 +3513,22 @@ if(LIVE.on){
   Object.keys(LV).forEach(k=>Object.defineProperty(S,k,{get:()=>LV[k],set:()=>{},enumerable:true,configurable:true}));
   S.reach=0;S.reels=0;S.live=CLIENTS.filter(c=>c.url).length;S.rules=0;rules.length=0;
   const IDLE={scout:'Looking for new leads',research:'Waiting for new leads to check',writer:'Waiting for leads to write to',sender:'Outbox is empty',reply:'Watching the inbox',booker:'Waiting for replies to book',
-    design:'Working on client sites',delivery:'Looking after live client sites',marketing:'Planning this week’s posts',director:'Watching the pipeline'};
+    design:'Not connected to real work yet',delivery:'Not connected to real work yet',marketing:'Not connected to real work yet',director:'Watching the pipeline'};
   const KT={maps:'scout',dir:'scout',insta:'scout',audit:'research',contact:'research',score:'research',first:'writer',subject:'writer',follow:'writer',send:'sender',deliver:'sender',sort:'reply',answer:'reply',object:'reply',
     book:'booker',remind:'booker',mock:'design',build:'design',qa:'delivery',onboard:'delivery',change:'delivery',launch:'delivery',social:'marketing',seo:'marketing',ads:'marketing',reel:'marketing',direct:'director'};
   Object.keys(ACT).forEach(k=>{ACT[k]=()=>[IDLE[KT[k]]||'Working'];});
   spawnDecision=function(){};forceBook=function(){};
   leads.length=0;meetings.length=0;feed.length=0;
+  agents.forEach(a=>{a.done=0;a.log=[];a.item=null;a.hist=a.hist.map(()=>0);a.bucket=0;});
+  let TEAMS={},TEAMLOG={};const REAL=['scout','research','writer','director','sender','reply','booker'];
+  const TN={scout:'Scouts',research:'Research',writer:'Writers',director:'Director',sender:'Sending',reply:'Replies',booker:'Bookings'};
+  setItem=function(a,msg,t){a.item={t:'Latest real task',rows:[msg,t||('today at '+clock())]};};
+  liveStats=function(a){
+    if(!REAL.includes(a.team))return `<div class="work"><p class="sec">Not connected yet</p><h3>No real work on this desk</h3><ul><li>This team is part of the office design.</li><li>Its numbers are hidden so nothing here is made up.</li></ul></div>`;
+    const t=TEAMS[a.team]||{total:0,today:0,hours:Array(12).fill(0)};
+    return `<div class="stats"><div><b>${fmt(t.total)}</b><span>${TN[a.team]} team tasks, all time</span></div><div><b>${fmt(t.today)}</b><span>Done today</span></div></div>
+      <div class="spark"><p>${TN[a.team]} team, last 12 hours</p>${spark(t.hours)}</div>
+      <p class="sec">Latest real work (team)</p><ul class="list">${(TEAMLOG[a.team]||[]).map(l=>`<li><span>${l.msg}</span><span>${l.t}</span></li>`).join('')||'<li><span>Nothing yet</span><span></span></li>'}</ul>`;};
   const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply'};
   const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote a message for '+l,approved:l=>'Approved the message for '+l,sent:l=>'Message sent to '+l,replied:l=>l+' replied',
     booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'A lead opened their preview: '+l};
@@ -3539,18 +3550,18 @@ if(LIVE.on){
   const badge=ok=>{const b=$('#demoBadge');if(b){const r=REV&&REV.month>0?'AED '+fmt(Math.round(REV.month))+' won this month':'';b.textContent=!ok?'Live data · reconnecting…':r?(innerWidth<700?'Live · '+r:'Live data · names hidden · '+r):'Live data · names hidden';}};badge(true);
   async function poll(){if(document.hidden&&last!==null)return;
     try{const r=await fetch(LIVE.url+'/rest/v1/rpc/office_public',{method:'POST',headers:{apikey:LIVE.key,'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw new Error(r.status);const j=await r.json();
-      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened','won'].forEach(k=>{LV[k]=cn[k]||0;});REV=j.revenue||null;S.rules=cn.rules||0;rules.length=0;(j.rules||[]).forEach(r=>{if(r&&r.text)rules.push(String(r.text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
-      /* emails ready to send wait in your Gmail drafts: one card in the Needs you tray */
+      const cn=j.counts||{};['found','researched','drafted','sent','replied','booked','opened','won'].forEach(k=>{LV[k]=cn[k]||0;});REV=j.revenue||null;TEAMS=j.teams||{};S.tests=cn.tests||0;TEAMLOG={};(j.events||[]).forEach(e=>{const tm=e.team||TEAM[e.kind];if(!tm||!TXT[e.kind])return;const L=TEAMLOG[tm]=TEAMLOG[tm]||[];if(L.length<6)L.push({t:e.created_at?at(e.created_at):'',msg:TXT[e.kind](e.label)});});S.rules=cn.rules||0;rules.length=0;(j.rules||[]).forEach(r=>{if(r&&r.text)rules.push(String(r.text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));});S.live=CLIENTS.filter(c=>c.url).length;LIVE.ok=true;
+      /* WhatsApp messages waiting for Hitin (emails send themselves): one card in the Needs you tray */
       waiting=cn.waiting||0;{const i=decisions.findIndex(d=>d.live);
-        if(waiting>0&&Date.now()>snooze){const t=waiting+' message'+(waiting>1?'s are':' is')+' ready to send';
-          if(i<0){const a=who('writer');decisions.push({id:++decId,live:1,agent:a.id,verb:'Send',short:waiting+' message'+(waiting>1?'s':'')+' ready to send',title:t,
-            body:'Emails wait in your Gmail drafts. WhatsApp messages are in one list email there, with a tap-to-send link for each. Send the ones you like, then reply to the list with their numbers.',opts:['Open Gmail drafts','Later'],
+        if(waiting>0&&Date.now()>snooze){const t=waiting+' WhatsApp message'+(waiting>1?'s are':' is')+' ready for you to send';
+          if(i<0){const a=who('writer');decisions.push({id:++decId,live:1,agent:a.id,verb:'Send',short:waiting+' WhatsApp to send',title:t,
+            body:'Emails send themselves. WhatsApp messages wait in one list email in your Gmail drafts, with a tap-to-send link for each. Send the ones you like, then reply to the list with their numbers.',opts:['Open Gmail drafts','Later'],
             rule:o=>o?'Remind me about drafts in an hour':'Check the drafts each morning',effect:o=>{if(!o)window.open('https://mail.google.com/mail/u/0/#drafts','_blank','noopener');else snooze=Date.now()+3600e3;}});
             a.status='Waiting for you: '+t;onDecisionsChanged();}
-          else if(decisions[i].title!==t){decisions[i].title=t;decisions[i].short=waiting+' message'+(waiting>1?'s':'')+' ready to send';onDecisionsChanged();}}
+          else if(decisions[i].title!==t){decisions[i].title=t;decisions[i].short=waiting+' WhatsApp to send';onDecisionsChanged();}}
         else if(i>=0&&waiting===0){decisions.splice(i,1);onDecisionsChanged();}}
       const ev=(j.events||[]).slice().reverse();
-      if(last===null)ev.forEach(e=>{const a=who(TEAM[e.kind]||'director');if(TXT[e.kind]){pushFeed(a,TXT[e.kind](e.label));if(e.created_at)feed[0].t=at(e.created_at);}});
+      if(last===null)ev.forEach(e=>{const a=who(TEAM[e.kind]||'director');if(TXT[e.kind]){const msg=TXT[e.kind](e.label),tt=e.created_at?at(e.created_at):clock();pushFeed(a,msg);feed[0].t=tt;a.log.unshift({t:tt,msg});if(a.log.length>6)a.log.pop();a.item={t:'Latest real task',rows:[msg,tt]};}});
       else ev.filter(e=>e.id>last).forEach((e,i)=>setTimeout(()=>show(e),i*1800));
       last=ev.reduce((m,e)=>Math.max(m,e.id),last||0);
       leads.length=0;(j.events||[]).forEach(e=>{if(!leads.some(l=>l.biz===e.label))leads.push({biz:e.label,area:'',stage:STG[e.kind]||'Found'});});

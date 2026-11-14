@@ -626,8 +626,8 @@ const A={}, agents=AG.map((r,i)=>{
 });
 const OBJ={vault:{x:15.6,y:2},brain:{x:16,y:4.3},meet:{x:14.3,y:8.7}};
 
-/* LIVE DATA: open the page with ?live=1 to show the real pipeline from Supabase instead of the demo */
-const LIVE={url:'https://zomspykhwkyuyrvcqwaf.supabase.co',key:'sb_publishable_BVDwGw2jQyiK3w8ockp-5Q_gCd_9rOA',on:/[?&]live=1(&|$)/.test(location.search),ok:false};
+/* LIVE DATA is the default: the page shows the real pipeline from Supabase. Add ?demo=1 to see the simulated demo instead. */
+const LIVE={url:'https://zomspykhwkyuyrvcqwaf.supabase.co',key:'sb_publishable_BVDwGw2jQyiK3w8ockp-5Q_gCd_9rOA',on:!/[?&](demo|live)=(1|0)(&|$)/.test(location.search)||/[?&]live=1(&|$)/.test(location.search),ok:false};
 const S={found:1840,researched:1512,drafted:1340,sent:1296,replied:87,booked:14,rules:42,live:9,reach:48200,reels:31};
 const B1=['Zephyra','Orbelle','Kalinth','Vantera','Mirabay','Sundoro','Tessaro','Nimbla','Corvessa','Halvora','Quillon','Brisane','Elmwick','Feyra','Lunaro'];
 const B2=['Dental Clinic','Gents Salon','Rent A Car','Cafe','Beauty Lounge','Pet Grooming','Auto Garage','Fitness Studio','Flowers','Tailors','Nail Studio','Bakery'];
@@ -3058,7 +3058,7 @@ let lastScreen='';
 const CT=new Map();
 function countTo(el,v){let c=CT.get(el);if(!c){c={cur:v,to:v,from:v,t0:0,run:false};CT.set(el,c);el.textContent=fmt(v);return;}if(c.to===v)return;
   c.from=c.cur;c.to=v;c.t0=performance.now();el.classList.add('bump');clearTimeout(c.bt);c.bt=setTimeout(()=>el.classList.remove('bump'),600);
-  if(!c.run){c.run=true;const step=now=>{const k=Math.min(1,(now-c.t0)/750),e=1-Math.pow(1-k,3);c.cur=Math.round(c.from+(c.to-c.from)*e);el.textContent=fmt(c.cur);if(k<1)requestAnimationFrame(step);else c.run=false;};requestAnimationFrame(step);}}
+  if(!c.run){c.run=true;const step=now=>{const k=Math.max(0,Math.min(1,(now-c.t0)/750)),e=1-Math.pow(1-k,3);c.cur=Math.round(c.from+(c.to-c.from)*e);el.textContent=fmt(c.cur);if(k<1)requestAnimationFrame(step);else c.run=false;};requestAnimationFrame(step);}}
 function paintNumbers(){
   [['found',S.found],['researched',S.researched],['sent',S.sent],['replied',S.replied],['booked',S.booked]].forEach(k=>{countTo($('#k-'+k[0]),k[1]);});
   if(!G)return;
@@ -3520,7 +3520,7 @@ if(LIVE.on){
   leads.length=0;meetings.length=0;feed.length=0;
   const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply'};
   const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote an email for '+l,approved:l=>'Email approved for '+l,sent:l=>'Sent the email to '+l,replied:l=>l+' replied',
-    booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'Preview opened: '+l+' is looking'};
+    booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'A lead opened their preview: '+l};
   const STG={found:'Found',researched:'Researched',drafted:'Researched',approved:'Researched',sent:'Emailed',replied:'Replied',booked:'Booked',won:'Booked',lost:'Replied',skipped:'Found',opened:'Warm'};
   const NEXT={scout:'research',research:'writer',writer:'sender',booker:null};
   const who=t=>agents.find(q=>q.team===t&&!q.home&&!q.paused)||agents.find(q=>q.team===t)||A.harsh;

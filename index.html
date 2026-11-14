@@ -1770,9 +1770,9 @@ function init3D(){
 
   /* ----- the hidden roof: it lives under the ground. When rain starts, posts and beams rise out of slots around the building,
      then glass slides out from both sides and meets in the middle. When the rain stops, it all goes back underground. ----- */
-  const ROOFY=4.75,RX0=-.25,RX1=31.25,RZ0=-9.06,RZ1=11.75,RSN=14,RSP=(RZ1-RZ0)/RSN,RHW=(RX1-RX0)/2,RDROP=ROOFY+.45;
+  const ROOFY=4.75,RX0=-.25,RX1=31.25,RZ0=-9.06,RZ1=16.25,RSN=17,RSP=(RZ1-RZ0)/RSN,RHW=(RX1-RX0)/2,RDROP=ROOFY+.45;
   let roofK=0,roofGoal=0,roofMove=0,roofCover=0;
-  const RPOSTS=[[RX0,RZ1],[7.6,RZ1],[13.2,RZ1],[18.3,RZ1],[24,RZ1],[RX1,RZ1],[RX0,5.5],[RX1,5.5],[RX0,-.4],[RX1,-.4],[RX0,RZ0+.04],[RX1,RZ0+.04]],RBACK=[15.5];
+  const RPOSTS=[[RX0,RZ1],[9.6,RZ1],[13.2,RZ1],[18.3,RZ1],[24,RZ1],[RX1,RZ1],[RX0,11.75],[RX1,11.75],[RX0,5.5],[RX1,5.5],[RX0,-.4],[RX1,-.4],[RX0,RZ0+.04],[RX1,RZ0+.04]],RBACK=[15.5];
   const roofFrame=new T3.Group();
   {const fb=new Builder(LITE?0:.03,false),DK=0x2C2833;
     RPOSTS.forEach(p=>fb.box(p[0]-.08,0,p[1]-.08,.16,ROOFY,.16,DK));RBACK.forEach(x=>fb.box(x-.08,F2,RZ0-.02,.16,ROOFY-F2,.16,DK));
@@ -1830,7 +1830,7 @@ function init3D(){
     const k=Math.min(1,dt*.35);wx.rain+=((wx.cur==='rain')-wx.rain)*k;wx.mist+=((wx.cur==='mist')-wx.mist)*k;wx.dust+=((wx.cur==='dust')-wx.dust)*k;
     /* rain */
     rainMesh.visible=wx.rain>.02;if(rainMesh.visible){rainMesh.material.opacity=.55*wx.rain*(1-.45*n);
-      if(live)for(let i=0;i<RN;i++){const o=i*6;let y=rpos[o+1]-15*dt;const px=rpos[o],pz=rpos[o+2],under=px>-.25&&px<31.25&&pz>-9&&pz<11.75,stop=under?(roofCover>.97?ROOFY+.06:floorY(px,pz)):-.2;
+      if(live)for(let i=0;i<RN;i++){const o=i*6;let y=rpos[o+1]-15*dt;const px=rpos[o],pz=rpos[o+2],under=px>-.25&&px<31.25&&pz>-9&&pz<16.25,stop=under?(roofCover>.97?ROOFY+.06:floorY(px,pz)):-.2;
         if(y<stop){y=12+Math.random()*3;const x=-3+Math.random()*37,z=-11+Math.random()*38;rpos[o]=x;rpos[o+2]=z;rpos[o+3]=x-.05;rpos[o+5]=z+.02;}rpos[o+1]=y;rpos[o+4]=y-.42;}
       rgeo.attributes.position.needsUpdate=true;}
     puddles.forEach((m,i)=>{const t=clamp(wx.rain*1.4-.25-(i%3)*.08,0,1)*(1-roofCover);m.visible=t>0.01;m.material.opacity=t*.55;m.scale.set(.6+.4*t,.42+.28*t,1);});
@@ -2338,7 +2338,7 @@ const TOUR=[
   {t:'Upstairs: dining hall and gym',p:'The whole team eats lunch together upstairs, and works out in the gym next door.',at:[8,3.2,-4.6],d:17},
   {t:'Content studio',p:'Tia films reels and client videos in front of the lights.',at:[28.2,3.3,-5.6],d:12},
   {t:'Garden and parking',p:'The front gate, the driveway, the team’s cars and a fountain garden by the canal.',at:[16,.5,21],d:22},
-  {t:'The hidden roof',p:'It lives underground. When rain starts, it rises out of the floor and glass slides across the top. When the rain stops, it hides again.',at:[15.5,3,3],d:36},
+  {t:'The hidden roof',p:'It lives underground. When rain starts, it rises out of the floor and glass slides across the top, over the café, meeting room, reception and pool too. When the rain stops, it hides again.',at:[15.5,3,5],d:38},
   {t:'Built by {brand}',p:'The billboard on the ridge shows off {brand}.',at:[8.5,7.2,-8.4],d:22}
 ];
 let tourTimer=null;

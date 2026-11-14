@@ -16,6 +16,8 @@ Twenty-seven AI agents in nine teams, led by Director Harsh, work in a two-floor
 - **Office life:** clients arrive by car and are shown to the lounge, birthday cake and a team photo, a Friday pizza drone, a night guard with a torch and a cleaning robot. Writers look stressed when replies are slow, and the whole floor cheers when a meeting is booked.
 - **More spaces:** a helipad on a glass deck above the studio (reached by a glass lift, where a helicopter lands now and then), a podcast booth, a server room that flashes when emails go out, a library upstairs and a kids' corner in the lounge.
 - **Change the mood:** a day-to-night slider, midday sun, weather (rain, dust storm, mist), and occasions (UAE National Day, Ramadan with an iftar table, Eid, Diwali, autumn leaves, a Christmas tree in reception). Occasions switch on by date.
+- **Real Dubai time:** in Live mode the sun follows its real path over Dubai, so it rises in the east, sits high at midday and sets in the west, and night falls when it really does. The clock shows the time in Dubai. Drag the slider to pick any time yourself.
+- **Realistic details:** smooth cars with tinted glass, alloy wheels and lights; people with rounded heads, eight hair styles, shoes and knees that bend as they walk and sit; glass and car paint that reflect the world around them; a pool that mirrors the sky, ripples in the wind, shows light patterns on its floor and glows at night.
 - **Wind and storms:** before rain the wind picks up, so trees bend, the flags at the gate flap and the pool ripples. Heavy rain brings lightning and thunder.
 - **Hidden roof:** it lives underground. When rain starts, posts and beams rise out of the floor and glass slides across the top to keep the office dry. When the rain stops, it slides back and sinks out of sight.
 - **Watch mode:** the camera cuts between live shots by itself.
@@ -37,6 +39,7 @@ The menu (☰) holds Tour, Watch, Sound, Photo, speed, time of day, quality, wea
 | --- | --- |
 | `?lite=1` | Lighter build for slow devices |
 | `?fx=1` | Always use the full effects |
+| `?time=17:30` | Starts the clock at that Dubai time (handy for showing a sunset) |
 | `#office=…` | Opens a branded office (made with Copy share link) |
 
 ## Built with

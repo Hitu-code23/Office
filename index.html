@@ -696,7 +696,7 @@ const hsh=(i,j)=>{const n=Math.sin(i*127.1+j*311.7)*43758.5453;return n-Math.flo
 const lvl=(i,j)=>Math.min(2,Math.max(i<0?-i:0,j<0?-j:0));
 const hillH=(i,j)=>lvl(i,j)*.55+(hsh(i,j)>.6?.22:0);
 const isWater=(i,j)=>(i>=FW&&j>=3&&j<=8)||(j>=D&&i>=4&&i<=8);
-Object.assign(OBJ,{cafe:{x:3.7,y:13.6,big:1},room:{x:10.2,y:13.6,big:1},desk:{x:14.8,y:13.3,big:1},lounge:{x:28.2,y:3.2,big:1},chill:{x:28.2,y:8.4,big:1},terrace:{x:24,y:13.9,big:1},dining:{x:4.8,y:-5,big:1,up:2.6},gym:{x:12.6,y:-5,big:1,up:2.6},studio:{x:28.1,y:-5.6,big:1,up:2.6},garden:{x:6,y:21,big:1},parking:{x:24.5,y:20.7,big:1}});
+Object.assign(OBJ,{cafe:{x:3.7,y:13.6,big:1},room:{x:10.2,y:13.6,big:1},desk:{x:14.8,y:13.3,big:1},lounge:{x:28.2,y:3.2,big:1},chill:{x:28.2,y:8.4,big:1},terrace:{x:24,y:13.9,big:1},dining:{x:4.8,y:-5,big:1,up:2.6},gym:{x:12.6,y:-5,big:1,up:2.6},studio:{x:28.1,y:-5.6,big:1,up:2.6},garden:{x:6,y:21,big:1},parking:{x:24.5,y:20.7,big:1},sky:{x:28.2,y:-5.2,big:1,up:3.8},podcast:{x:29.4,y:-2.95,big:1,up:2.6},server:{x:21,y:-.2,big:1},library:{x:16.8,y:-7.7,big:1,up:2.6},kids:{x:30.05,y:3.6,big:1}});
 const labs=[];
 const view={az:.62,pol:.98,dist:54,tx:15.5,ty:1,tz:7.6}, cur={}, home={};
 let G=null, sel=null, speed=1, lastTouch=-1e9, hoverId=null, tour=-1, tourTeam=null, photo=false;
@@ -1117,6 +1117,8 @@ function init3D(){
       if(w.kind==='run'){const sw=Math.sin(tt*14+a.ph)*.9;P.lL.rotation.x=sw;P.lR.rotation.x=-sw;P.aL.rotation.x=HALF-sw*.7;P.aR.rotation.x=HALF+sw*.7;g.position.y=F2+.12+Math.abs(Math.sin(tt*14+a.ph))*.05;}
       else if(w.kind==='lift'){P.lL.rotation.x=P.lR.rotation.x=0;const u=Math.abs(Math.sin(tt*2.2+a.ph));P.aL.rotation.x=P.aR.rotation.x=-.4-u*1.6;}
       else if(w.kind==='film'){P.lL.rotation.x=P.lR.rotation.x=0;ease(P.aL.rotation,'x',.4,.2);P.aR.rotation.x=-.5+Math.sin(tt*4+a.ph)*.45;P.head.rotation.y=Math.sin(tt*.9)*.25;}
+      else if(w.kind==='read'){P.lL.rotation.x=P.lR.rotation.x=-HALF;P.aL.rotation.x=P.aR.rotation.x=-.75;P.head.rotation.x=.32;P.head.rotation.y=0;}
+      else if(w.kind==='pod'){P.lL.rotation.x=P.lR.rotation.x=-HALF;ease(P.aL.rotation,'x',.2,.2);P.aR.rotation.x=-.3+Math.sin(tt*3.2+a.ph)*.35;P.head.rotation.y=Math.sin(tt*1.3+a.ph)*.2;}
       else if(w.sit){P.lL.rotation.x=P.lR.rotation.x=-HALF;ease(P.aL.rotation,'x',.2,.2);ease(P.aR.rotation,'x',w.kind==='table'?-.5+Math.sin(tt*1.6+a.ph)*.35:.2,.2);
         P.head.rotation.x=.04+Math.sin(tt*3+a.ph)*.07;P.head.rotation.y=Math.sin(tt*.9+a.ph)*.3;if(w.kind==='table')P.cup.visible=true;}
       else{P.lL.rotation.x=P.lR.rotation.x=0;ease(P.aL.rotation,'x',w.kind==='note'?HALF:.5,.2);ease(P.aR.rotation,'x',w.kind==='note'?-1.25+Math.sin(tt*13)*.22:.5,.3);}
@@ -1190,7 +1192,7 @@ function init3D(){
     go(a,pts,{kind:q.k,sit:!!q.sit,hold:8+Math.random()*5,face:q.face,onDone:()=>{q.busy=false;}});return true;}
   const upFront=a=>a.team==='marketing'?exitPts(a).concat([V(24.6,0,aisle(a.y)),V(24.6,0,-1.2)]):toFront(a).concat([V(STX,0,FA),V(STX,0,3.3),V(STX,0,-1.2)]);
   const UPS=[[2.6,-5.7],[4.4,-5.7],[6.2,-5.7],[2.6,-3.1],[4.4,-3.1],[6.2,-3.1]].map(p=>({k:'lunch',x:p[0],z:p[1],face:0}))
-    .concat([{k:'run',x:10.4,z:-6.85,face:0},{k:'run',x:11.7,z:-6.85,face:0},{k:'lift',x:13.4,z:-5.8,face:0}]);UPS.forEach(q=>q.busy=false);
+    .concat([{k:'run',x:10.4,z:-6.85,face:0},{k:'run',x:11.7,z:-6.85,face:0},{k:'lift',x:13.4,z:-5.8,face:0},{k:'read',x:16.25,z:-7.35,face:0},{k:'read',x:17.3,z:-7.35,face:0}]);UPS.forEach(q=>q.busy=false);
   function tripUp(a,force){if(a.team==='director')return false;const lunch=todPhase()<.16;let free=UPS.filter(q=>!q.busy&&((force||lunch)?q.k==='lunch':true));if(force&&!free.length)return false;if(!free.length)free=UPS.filter(q=>!q.busy);if(!free.length)return false;
     const q=pick(free);q.busy=true;const pts=upFront(a);if(q.k==='lunch')pts.push(V(1.2,0,-1.2),V(1.2,0,q.z));else pts.push(V(q.x,0,-1.2));pts.push(V(q.x,0,q.z));
     go(a,pts,{kind:q.k,sit:q.k==='lunch',hold:q.k==='lunch'?10+Math.random()*6:8+Math.random()*5,face:q.face,onDone:()=>{q.busy=false;if(q.k==='lunch')life.lunches=(life.lunches||0)+1;else life.workouts=(life.workouts||0)+1;}});return true;}
@@ -1338,12 +1340,108 @@ function init3D(){
     robot.userData.l.material.color.setHex(rob.path.length?0x5FE3FF:0x7BD9A0);dockL.material.color.setHex(rob.path.length?0x3A3A46:0x7BD9A0);}
   /* 4. moods: a quiet inbox stresses the writers and the reply team */
   function moodTick(dt,live){if(!live||life.night)return;replyT+=dt;if(replyT>45){stressT-=dt;if(stressT<=0){stressT=5;agents.forEach(a=>{if((a.team==='writer'||a.team==='reply')&&!a.walk)emote(a.id,'sad',4.5);});}}}
-  function storyTick(dt,tt,n,live){visitTick(dt,tt,n,live);eventsTick(dt,tt,n,live);nightTick(dt,tt,n,live);moodTick(dt,live);}
+  /* ================= new spaces: sky lounge and helipad with a glass lift, podcast booth, server room, library, kids' corner ================= */
+  const DY2=6.2,SKX0=25.4,SKX1=31,SKZ0=-8.8,SKZ1=-1.6,HPX=28.2,HPZ=-6.8;
+  {const b=new Builder(LITE?0:.03,false),gl=new Builder(0,false),gb=new Builder(0,false),DK=0x2C2833;
+    /* the sky deck: four columns from the second floor, a glass floor in a frame, a glass railing */
+    [[SKX0+.1,SKZ0+.1],[SKX1-.1,SKZ0+.1],[SKX0+.1,SKZ1-.1],[SKX1-.1,SKZ1-.1]].forEach(p=>b.box(p[0]-.1,F2,p[1]-.1,.2,DY2-F2,.2,0xD8C8AC,0xB9AC98));
+    b.box(SKX0,DY2-.14,SKZ0,SKX1-SKX0,.14,.16,DK).box(SKX0,DY2-.14,SKZ1-.16,SKX1-SKX0,.14,.16,DK).box(SKX0,DY2-.14,SKZ0,.16,.14,SKZ1-SKZ0,DK).box(SKX1-.16,DY2-.14,SKZ0,.16,.14,SKZ1-SKZ0,DK);
+    for(let x=SKX0+1.4;x<SKX1-.5;x+=1.4)b.box(x-.03,DY2-.1,SKZ0,.06,.08,SKZ1-SKZ0,DK);
+    gl.box(SKX0,DY2-.04,SKZ0,SKX1-SKX0,.03,SKZ1-SKZ0,0xBFE6FF);
+    [[SKX0,SKZ0,SKX1-SKX0,.04],[SKX0,SKZ0,.04,SKZ1-SKZ0],[SKX1-.04,SKZ0,.04,SKZ1-SKZ0],[SKX0,SKZ1-.04,SKX1-SKX0-1,.04]].forEach(r=>{gl.box(r[0],DY2,r[1],r[2],.8,r[3],0xBFE6FF);b.box(r[0],DY2+.8,r[1],Math.max(r[2],.06),.05,Math.max(r[3],.06),DK);});
+    /* lounge half: two sofas, a low table, a bar with stools, string lights */
+    b.box(SKX0+.3,DY2,-4.6,4.7,.012,2.8,0xB88A5A,0x9A7146);
+    b.box(25.9,DY2,-3.15,1.8,.24,.5,0x6A5ACD,0x5446A8).box(25.9,DY2+.24,-2.73,1.8,.32,.12,0x6A5ACD,0x5446A8).box(25.9,DY2,-4.55,1.8,.24,.5,0x6A5ACD,0x5446A8).box(25.9,DY2+.24,-4.6,1.8,.32,.12,0x6A5ACD,0x5446A8);
+    b.box(26.3,DY2,-3.95,1,.22,.5,0xF1E9DA,0xD9CFBC);
+    b.box(29.7,DY2,-4.5,.6,.55,2.4,0x2A2440,0x1E1A30).box(29.66,DY2+.55,-4.54,.68,.04,2.48,0xD9A93A);[-4.1,-3.4,-2.7].forEach(z=>b.cb(29.2,DY2,z,.24,.42,.24,0x3A3A46));
+    [[29.9,-4.3,0xE08A3C],[30.05,-3.9,0x8AD8C4],[29.9,-3.5,0xF7A1B5],[30.05,-3.1,0xFFD166]].forEach(q=>b.cb(q[0],DY2+.59,q[1],.08,.14,.08,q[2]));
+    b.box(SKX0+.15,DY2+.8,SKZ1-.2,SKX1-SKX0-.3,.02,.02,DK);for(let x=SKX0+.5;x<SKX1-.3;x+=.5)gb.cb(x,DY2+.72,SKZ1-.2,.08,.09,.08,0xFFD98A);
+    /* helipad: dark disc, white ring and H, edge lights */
+    b.cb(HPX,DY2,HPZ,3.6,.03,3.6,0x2A2A34,0x1E1B22);
+    for(let k=0;k<24;k++){const a=k/24*6.283;b.box(HPX+Math.cos(a)*1.45-.12,DY2+.031,HPZ+Math.sin(a)*1.45-.12,.24,.004,.24,0xF4F1EA);}
+    b.box(HPX-.55,DY2+.032,HPZ-.7,.18,.004,1.4,0xF4F1EA).box(HPX+.37,DY2+.032,HPZ-.7,.18,.004,1.4,0xF4F1EA).box(HPX-.37,DY2+.032,HPZ-.09,.74,.004,.18,0xF4F1EA);
+    /* the glass lift up to the deck, at the front corner of the studio */
+    [[30.2,-1.5],[30.9,-1.5],[30.2,-.8],[30.9,-.8]].forEach(p=>b.box(p[0]-.04,F2,p[1]-.04,.08,DY2-F2+.5,.08,DK));b.box(30.16,DY2+.5,-1.54,.78,.08,.78,DK);
+    gl.box(30.2,F2,-.84,.7,DY2-F2+.5,.03,0xBFE6FF).box(30.86,F2,-1.5,.03,DY2-F2+.5,.7,0xBFE6FF);
+    /* podcast booth in the studio's front corner: glass box, table, two mics */
+    b.box(28.4,F2,-3.95,2.05,.012,2.05,0x2A2440,0x1E1A30);[[28.4,-3.95],[30.4,-3.95],[28.4,-1.95],[30.4,-1.95]].forEach(p=>b.box(p[0]-.04,F2,p[1]-.04,.08,1.4,.08,DK));
+    b.box(28.36,F2+1.4,-3.99,2.12,.06,.08,DK).box(28.36,F2+1.4,-1.99,2.12,.06,.08,DK).box(28.36,F2+1.4,-3.99,.08,.06,2.12,DK).box(30.36,F2+1.4,-3.99,.08,.06,2.12,DK);gl.box(28.42,F2,-3.97,1.96,1.38,.03,0xBFE6FF).box(30.38,F2,-3.95,.03,1.38,2,0xBFE6FF).box(28.42,F2,-1.97,1.96,1.38,.03,0xBFE6FF).box(28.38,F2,-3.95,.03,1.38,.7,0xBFE6FF);
+    b.box(29.2,F2+.36,-3.1,.4,.05,.4,0x6B4630,0x4E3222).box(29.36,F2,-2.94,.08,.36,.08,0x3A3A46);[[29.25,-2.9],[29.55,-2.9]].forEach(p=>b.box(p[0]-.02,F2+.41,p[1]-.02,.04,.16,.04,0x1E1B22).cb(p[0],F2+.57,p[1],.07,.1,.07,0x8A8FA0));
+    [28.9,29.9].forEach(x=>b.cb(x,F2,-2.9,.34,.22,.34,0x3A3A46));
+    /* server room built into the wall behind the Design desks: dark racks behind glass */
+    b.box(18.3,0,-.58,5.4,2.32,.06,0x15131C).box(18.25,0,-.6,5.5,.08,.5,0x2A2733).box(18.25,2.28,-.6,5.5,.08,.5,0x2A2733);
+    for(let i=0;i<6;i++)b.box(18.6+i*.85,.08,-.52,.7,2.0,.36,0x22252E,0x1A1C24);gl.box(18.3,.08,-.14,5.4,2.2,.03,0x9FD6FF);
+    /* library nook upstairs: bookshelves, two armchairs, a rug and a lamp */
+    b.box(15.8,F2,-8.82,1.95,2,.26,0x6B4630,0x4E3222).box(15.8,F2,-8.82,.06,2,.38,0x6B4630).box(17.69,F2,-8.82,.06,2,.38,0x6B4630);for(let r=0;r<4;r++){b.box(15.85,F2+.1+r*.48,-8.5,1.85,.04,.06,0x4E3222);for(let k=0;k<14;k++)b.box(15.88+k*.13,F2+.14+r*.48,-8.56,.1,.28+((k*7+r*3)%5)*.03,.22,[0xC8202E,0x2F6FB0,0xE3B23C,0x3C7A5A,0xF4F1EA,0x8E6BD8][(k+r)%6]);}
+    b.box(15.85,F2,-8.2,1.9,.012,1.5,0x8E3B46,0x6E2D36);[16.25,17.3].forEach(x=>b.box(x-.28,F2,-7.6,.56,.24,.5,0x3F8F8A,0x2F6F6B).box(x-.28,F2+.24,-7.68,.56,.42,.1,0x3F8F8A,0x2F6F6B).box(x-.3,F2+.24,-7.6,.06,.16,.5,0x2F6F6B).box(x+.24,F2+.24,-7.6,.06,.16,.5,0x2F6F6B));
+    b.box(16.72,F2,-7.7,.05,1.3,.05,DK);gb.cb(16.75,F2+1.3,-7.68,.22,.16,.22,0xFFD98A);
+    /* kids' corner in the client lounge: foam mat, a tiny table, blocks, a teddy */
+    for(let i=0;i<3;i++)for(let j=0;j<2;j++)b.box(29.65+i*.33,.022,3.05+j*.6,.32,.02,.59,[0xFFD166,0x8AD8C4,0xF7A1B5,0xB8A4FF][(i+j)%4]);
+    b.box(29.8,.04,4.0,.5,.18,.32,0xF4F1EA,0xE2DFD8);[[29.85,3.3,0xE0565B],[30.05,3.32,0x2F6FB0],[29.95,3.28,0xE3B23C]].forEach((q,k)=>b.cb(q[0],.04+k*.1,q[1],.1,.1,.1,q[2]));
+    b.cb(30.4,.04,3.25,.18,.2,.16,0xC49A6C).cb(30.4,.24,3.25,.13,.13,.12,0xC49A6C);
+    scene.add(new T3.Mesh(b.geo(),litMat));scene.add(new T3.Mesh(gb.geo(),glowMat));
+    const gm=new T3.Mesh(gl.geo(),new T3.MeshPhongMaterial({color:0xBFE6FF,transparent:true,opacity:.2,shininess:140,specular:0xffffff,depthWrite:false,side:T3.DoubleSide}));gm.renderOrder=2;scene.add(gm);}
+  OBS.push([29.6,30.65,3.0,4.35]);
+  /* sky lounge guests and the bartender */
+  const skyPeople=[[26.4,-2.95,Math.PI,1],[27.1,-2.95,Math.PI,1],[26.7,-4.35,0,1],[30.1,-3.6,-HALF,0]].map((q,i)=>{const p=npc({shirt:[0xE0565B,0xF4F1EA,0x2F6FB0,0x1E1B22][i],skin:[0xF1C9A5,0xA9744E,0xD8A47C,0xEBB98D][i],hair:[0x3B2618,0x0F0F14,0x1E1626,0x3B2618][i],style:i%5,apron:i===3?0xD9A93A:0},q[0],q[1],q[2]);
+    p.g.position.y=DY2;if(q[3]){p.P.lL.rotation.x=p.P.lR.rotation.x=-HALF;}return p;});
+  /* kid playing with blocks */
+  const kid=npc({shirt:0xFFD166,skin:0xEBB98D,hair:0x3B2618,style:3,legs:0x2F6FB0},30.0,3.62,Math.PI);kid.g.scale.setScalar(.62);kid.P.lL.rotation.x=kid.P.lR.rotation.x=-HALF;
+  /* server LEDs */
+  const SLN=6*4*11,slPos=new Float32Array(SLN*3),slCol=new Float32Array(SLN*3),slSeed=[];
+  for(let r=0,k=0;r<6;r++)for(let c=0;c<4;c++)for(let h=0;h<11;h++,k++){slPos.set([18.72+r*.85+c*.15,.25+h*.17,-.15],k*3);slSeed.push([Math.random(),Math.random()<.75?0:1]);}
+  const slGeo=new T3.BufferGeometry();slGeo.setAttribute('position',new T3.BufferAttribute(slPos,3));slGeo.setAttribute('color',new T3.BufferAttribute(slCol,3));
+  const slPts=new T3.Points(slGeo,new T3.PointsMaterial({size:.07,vertexColors:true,toneMapped:false,transparent:true,opacity:.95,depthWrite:false}));slPts.frustumCulled=false;scene.add(slPts);
+  let srvK=0;const srvL=new T3.PointLight(0x5FE3FF,0,5,2);srvL.position.set(21,1.2,.3);scene.add(srvL);
+  /* ON AIR light on the booth */
+  const onAir=new T3.Mesh(new T3.BoxGeometry(.5,.14,.04),new T3.MeshBasicMaterial({color:0x3A1A1E,toneMapped:false}));onAir.position.set(29.4,F2+1.6,-1.93);scene.add(onAir);
+  const booth={on:false,t:50,who:[]};
+  /* lift cab with an occasional rider */
+  const cab=new T3.Mesh(new T3.BoxGeometry(.62,.06,.62),litMat.clone());cab.material=new T3.MeshLambertMaterial({color:0x2C2833});cab.position.set(30.55,F2,-1.15);scene.add(cab);
+  const rider=npc({shirt:0x58B862,skin:0xD8A47C,hair:0x0F0F14,style:1},30.55,-1.15,Math.PI);rider.g.position.y=F2;rider.g.visible=false;
+  const lift={y:F2,dir:1,t:6};
+  /* helicopter */
+  const heli=new T3.Group();{const b=new Builder(LITE?0:.04,false);b.box(-.45,.25,-.9,.9,.75,1.6,0xF4F1EA,0xDCD6CA).box(-.38,.55,-1.0,.76,.38,.3,0x22303C).box(-.12,.6,.7,.24,.24,2.0,0xF4F1EA).box(-.04,.6,2.6,.08,.6,.3,0x8B6CFF)
+      .box(-.5,.25,-.6,1,.1,.08,0x8B6CFF).box(-.55,0,-.7,.06,.06,1.4,0x3A3A46).box(.49,0,-.7,.06,.06,1.4,0x3A3A46).box(-.55,0,-.3,.06,.28,.06,0x3A3A46).box(.49,0,-.3,.06,.28,.06,0x3A3A46).box(-.55,0,.3,.06,.28,.06,0x3A3A46).box(.49,0,.3,.06,.28,.06,0x3A3A46).box(-.05,1.0,-.15,.1,.18,.1,0x3A3A46);
+    heli.add(new T3.Mesh(b.geo(),litMat));heli.userData.rot=new T3.Group();heli.userData.rot.position.set(0,1.2,-.1);
+    [0,HALF].forEach(r=>{const m=new T3.Mesh(new T3.BoxGeometry(4.2,.03,.16),new T3.MeshLambertMaterial({color:0x2A2A34}));m.rotation.y=r;heli.userData.rot.add(m);});heli.add(heli.userData.rot);
+    heli.userData.tail=new T3.Mesh(new T3.BoxGeometry(.04,.7,.08),new T3.MeshLambertMaterial({color:0x2A2A34}));heli.userData.tail.position.set(.1,.9,2.62);heli.add(heli.userData.tail);}
+  heli.visible=false;scene.add(heli);
+  const heli0={s:'wait',t:60,spin:0},HA=V(70,26,-50),HB=V(HPX,DY2+4,HPZ),HC=V(HPX,DY2+.04,HPZ);const heliS=heli0;Object.defineProperty(heli,'s',{get:()=>heli0.s});
+  const padL=[0,1,2,3].map(k=>{const a=k*HALF+HALF/2,m=new T3.Mesh(new T3.SphereGeometry(.07,6,4),new T3.MeshBasicMaterial({color:0x5FE3FF,toneMapped:false}));m.position.set(HPX+Math.cos(a)*1.75,DY2+.08,HPZ+Math.sin(a)*1.75);scene.add(m);return m;});
+  function spacesTick(dt,tt,n,live){
+    /* server racks: a quiet flicker, then a bright burst every time emails go out */
+    srvK=Math.max(0,srvK-dt);for(let i=0;i<SLN;i++){const q=slSeed[i],f=.25+.35*(Math.sin(tt*(3+q[0]*9)+q[0]*40)>.6?1:0),b=Math.min(1,f+srvK*(Math.sin(tt*30+i)>0?.9:.2));
+      if(q[1]){slCol[i*3]=b;slCol[i*3+1]=.55*b;slCol[i*3+2]=.1*b;}else{slCol[i*3]=.15*b;slCol[i*3+1]=b;slCol[i*3+2]=.8*b;}}
+    slGeo.attributes.color.needsUpdate=true;srvL.intensity=.3+srvK*1.4+n*.3;
+    /* podcast: Riz and Lina record now and then */
+    if(live&&!life.night){booth.t-=dt;if(booth.t<=0&&!booth.who.length){booth.t=70+Math.random()*50;const a=A.riz,b2=A.lina;
+      if(idle(a)&&idle(b2)){booth.who=[a,b2];[[a,28.9,HALF,[V(28.2,0,-1.2),V(28.2,0,-2.9),V(28.9,0,-2.9)]],[b2,29.9,-HALF,[V(28.2,0,-1.2),V(28.6,0,-2.3),V(29.9,0,-2.3),V(29.9,0,-2.9)]]].forEach(q=>{
+          go(q[0],exitPts(q[0]).concat([V(24.6,0,aisle(q[0].y)),V(24.6,0,-1.2)],q[3]),{kind:'pod',hold:16,face:q[2],onDone:()=>{booth.who=booth.who.filter(x=>x!==q[0]);}});});watchEvent('podcast');}}}
+    booth.on=booth.who.length===2&&booth.who.every(a=>a.walk&&a.walk.kind==='pod'&&a.walk.wait>0);onAir.material.color.setHex(booth.on&&Math.sin(tt*4)>-.6?0xFF3B4A:0x3A1A1E);
+    /* the lift glides up and down; sometimes someone rides it */
+    lift.t-=dt;if(lift.t<=0){const target=lift.dir>0?DY2:F2,sp=1.1*dt;lift.y+=Math.sign(target-lift.y)*Math.min(sp,Math.abs(target-lift.y));
+      if(Math.abs(lift.y-target)<.001){lift.dir*=-1;lift.t=7+Math.random()*6;rider.g.visible=false;}else if(!rider.g.visible&&Math.random()<.004)rider.g.visible=true;}
+    cab.position.y=lift.y;rider.g.position.y=lift.y+.03;
+    /* sky lounge guests chat; the bartender polishes a glass; the kid plays */
+    skyPeople.forEach((p,i)=>{blink(p,dt,live);face(p,.5,1,dt);p.P.head.rotation.y=Math.sin(tt*.5+i*1.7)*.4;if(i===3)p.P.aR.rotation.x=.3+Math.sin(tt*5)*.3;else p.P.aR.rotation.x=.2+(Math.sin(tt*.9+i*2)>.7?-.7:0);});
+    kid.P.aL.rotation.x=.2+Math.abs(Math.sin(tt*2.4))*.8;kid.P.aR.rotation.x=.2+Math.abs(Math.sin(tt*2.4+1.4))*.8;kid.P.head.rotation.x=.25;blink(kid,dt,live);face(kid,.8,1,dt);
+    /* helicopter: flies in, lands on the pad, waits, takes off */
+    const h=heli0;padL.forEach((m,k)=>{m.visible=h.s!=='wait'||Math.sin(tt*2+k)>.6||n>.5;});
+    if(h.s==='wait'){if(live)h.t-=dt;if(h.t<=0&&!life.night&&n<.5&&wx.rain<.2){h.s='in';h.t=0;heli.visible=true;watchEvent('heli');if(typeof snd!=='undefined'&&snd.on&&snd.ctx)snd.note(70,0,4,.05);}}
+    else{h.t+=dt;h.spin=h.s==='parked'?Math.max(.15,h.spin-dt*.25):Math.min(1,h.spin+dt*.6);heli.userData.rot.rotation.y+=dt*30*h.spin;heli.userData.tail.rotation.x+=dt*40*h.spin;
+      if(h.s==='in'){const u=Math.min(1,h.t/9),e=1-Math.pow(1-u,2);heli.position.lerpVectors(HA,HB,e);heli.rotation.y=Math.atan2(HA.x-HB.x,HA.z-HB.z);heli.rotation.z=Math.sin(u*3.14)*.08;if(u>=1){h.s='land';h.t=0;}}
+      else if(h.s==='land'){const u=Math.min(1,h.t/3);heli.position.lerpVectors(HB,HC,u*u*(3-2*u));heli.rotation.z=0;if(u>=1){h.s='parked';h.t=0;}}
+      else if(h.s==='parked'){if(h.t>14){h.s='up';h.t=0;}}
+      else if(h.s==='up'){const u=Math.min(1,h.t/3);heli.position.lerpVectors(HC,HB,u*u);if(u>=1){h.s='out';h.t=0;}}
+      else if(h.s==='out'){const u=Math.min(1,h.t/8);heli.position.lerpVectors(HB,V(-60,30,-40),u*u);heli.rotation.y=Math.atan2(HB.x+60,HB.z+40);if(u>=1){h.s='wait';h.t=150+Math.random()*90;heli.visible=false;}}}}
+  const heliRef=heli0;
+  function storyTick(dt,tt,n,live){spacesTick(dt,tt,n,live);visitTick(dt,tt,n,live);eventsTick(dt,tt,n,live);nightTick(dt,tt,n,live);moodTick(dt,live);}
   let upT=5,filmT=12,rwTm=0;
   function extTick(dt,tt,n,live){
     storyTick(dt,tt,n,live);
     if(live&&!life.night&&!life.commute.length){upT-=dt;if(upT<=0){const lunch=todPhase()<.16;upT=(lunch?3:7)+Math.random()*5;
-        const on=agents.filter(q=>q.walk&&(q.walk.kind==='lunch'||q.walk.kind==='run'||q.walk.kind==='lift')).length;
+        const on=agents.filter(q=>q.walk&&(q.walk.kind==='lunch'||q.walk.kind==='run'||q.walk.kind==='lift'||q.walk.kind==='read')).length;
         if(on<(lunch?6:3)){const c=agents.filter(q=>idle(q)&&q.team!=='director');if(c.length)tripUp(pick(c));}}
       filmT-=dt;if(filmT<=0){filmT=18+Math.random()*14;tripFilm(A.tia);}}
     const filming=!!(A.tia.walk&&A.tia.walk.kind==='film'&&A.tia.walk.wait>0);recL.visible=filming&&Math.sin(tt*6)>-.2;keyL.intensity=filming?2.2:.25+n*.4;
@@ -1698,12 +1796,12 @@ function init3D(){
   pickBox(OBJ.vault.x,.6,OBJ.vault.y,1.1,1.2,1.1,'obj','vault');pickBox(OBJ.brain.x,.7,OBJ.brain.y,.9,1.5,.9,'obj','brain');pickBox(OBJ.meet.x,.6,OBJ.meet.y,1,1.2,.6,'obj','meet');
   pickBox(3.75,.3,13.6,6.4,.6,3.9,'obj','cafe');
   const STAFF={uzair:{p:cleaner,move:true},barista:{p:barista},recep:{p:recep},cat:{p:{g:cat.g},move:true}};
-  for(const k in STAFF){const q=STAFF[k].p.g.position;STAFF[k].pick=pickBox(q.x,.55,q.z,k==='cat'?.6:.7,k==='cat'?.5:1.2,k==='cat'?.6:.7,'staff',k);}pickBox(10.2,.65,13.6,3.9,1.3,3.5,'obj','room');pickBox(14.8,.6,13.4,3.3,1.2,2.9,'obj','desk');pickBox(28.2,.6,3.2,5,1.4,5.2,'obj','lounge');pickBox(28.2,.5,8.4,5,1,4,'obj','chill');pickBox(24,.3,13.9,13.6,.6,3.9,'obj','terrace');pickBox(4.8,3.2,-5,8.6,1.2,7.6,'obj','dining');pickBox(12.6,3.2,-5,6,1.2,7.6,'obj','gym');pickBox(28.1,3.4,-5.6,5.2,1.6,6.4,'obj','studio');pickBox(5.6,.4,21,14.8,.8,7.6,'obj','garden');pickBox(24.5,.4,20.7,13.8,.8,7.4,'obj','parking');
+  for(const k in STAFF){const q=STAFF[k].p.g.position;STAFF[k].pick=pickBox(q.x,.55,q.z,k==='cat'?.6:.7,k==='cat'?.5:1.2,k==='cat'?.6:.7,'staff',k);}pickBox(10.2,.65,13.6,3.9,1.3,3.5,'obj','room');pickBox(14.8,.6,13.4,3.3,1.2,2.9,'obj','desk');pickBox(28.2,.6,3.2,5,1.4,5.2,'obj','lounge');pickBox(28.2,.5,8.4,5,1,4,'obj','chill');pickBox(24,.3,13.9,13.6,.6,3.9,'obj','terrace');pickBox(4.8,3.2,-5,8.6,1.2,7.6,'obj','dining');pickBox(12.6,3.2,-5,6,1.2,7.6,'obj','gym');pickBox(28.1,3.4,-5.6,5.2,1.6,6.4,'obj','studio');pickBox(5.6,.4,21,14.8,.8,7.6,'obj','garden');pickBox(24.5,.4,20.7,13.8,.8,7.4,'obj','parking');pickBox(28.2,6.6,-5.2,5.6,1,7.2,'obj','sky');pickBox(29.4,3.3,-2.95,2.1,1.5,2.1,'obj','podcast');pickBox(21,1.15,-.3,5.4,2.3,.6,'obj','server');pickBox(16.8,3.6,-8,2,2,1.6,'obj','library');pickBox(30.1,.3,3.7,1.1,.6,1.4,'obj','kids');
 
   /* name tags (HTML, pinned to 3D points) */
   agents.forEach(a=>{const d=document.createElement('div');d.className='lab agent'+(a.team==='director'?' boss':'');d.innerHTML=`<div class="slot"></div><button class="tagb" data-agent="${a.id}" aria-label="${a.name}, ${T[a.team].one}. ${a.role}"><i></i><span>${a.team==='director'?a.name+', Director':a.name}</span></button>`;
     labelsEl.appendChild(d);a.lab=d;labs.push({el:d,agent:a,show:null,pos:V(a.x+.18,1.14,a.y-.6)});});
-  [['vault','Lead Vault','t-vault',1.3],['brain','Shared Brain','t-brain',1.75],['meet','Meetings booked','t-meetsub',1.25],['cafe','Café','t-cafe',1.75],['room','Meeting room','t-room',1.6],['desk','Reception','t-desk',2.05],['lounge','Client lounge','t-lounge',2.05],['chill','Chill zone','t-chill',1.5],['terrace','Terrace','t-terrace',1.6],['dining','Dining hall','t-dining',4.3],['gym','Gym','t-gym',4.3],['studio','Content studio','t-studio',4.6],['garden','Garden','t-garden',2.4],['parking','Parking','t-parking',1.5]].forEach(q=>{const p=OBJ[q[0]],d=document.createElement('div');d.className='lab';
+  [['vault','Lead Vault','t-vault',1.3],['brain','Shared Brain','t-brain',1.75],['meet','Meetings booked','t-meetsub',1.25],['cafe','Café','t-cafe',1.75],['room','Meeting room','t-room',1.6],['desk','Reception','t-desk',2.05],['lounge','Client lounge','t-lounge',2.05],['chill','Chill zone','t-chill',1.5],['terrace','Terrace','t-terrace',1.6],['dining','Dining hall','t-dining',4.3],['gym','Gym','t-gym',4.3],['studio','Content studio','t-studio',4.6],['garden','Garden','t-garden',2.4],['parking','Parking','t-parking',1.5],['sky','Sky lounge','t-sky',7.6],['podcast','Podcast booth','t-podcast',4.5],['server','Server room','t-server',2.7],['library','Library','t-library',5],['kids','Kids’ corner','t-kids',1.1]].forEach(q=>{const p=OBJ[q[0]],d=document.createElement('div');d.className='lab';
     d.innerHTML=`<button class="tagb obj" data-obj="${q[0]}"><span>${q[1]}</span><small id="${q[2]}"></small></button>`;labelsEl.appendChild(d);p.lab=d;labs.push({el:d,pos:V(p.x,q[3],p.y)});});
   $('#t-meetsub').textContent='this week';
   setTimeout(()=>{const ct=document.getElementById('cleanerTag');if(ct)ct.textContent=THEME.cleaner;},0);
@@ -1830,6 +1928,7 @@ function init3D(){
     add('lounge','Clients in the lounge',28.2,.8,3.4,10,.9);add('chill','The chill zone',28,.5,8.4,10,.8);add('terrace','The terrace',24,.4,13.9,13,.8);add('wing','The new wing',21.5,.6,5,15,.9);if(visit.s!=='wait'&&client.g.visible)add('visit','A client is visiting',client.x,.6,client.z,9,2.6,client.g);else if(visit.s==='in')add('visit','A client just drove in',15.3,.6,21,12,2.4);
     if(ev.cakeOn>0)add('cake','Cake for '+(ev.cakeFor?ev.cakeFor.name:'the team'),4.4,3.2,-4.8,9,2.6);if(ev.ph)add('photo','Team photo on the terrace',22,.8,14,12,2.6);
     if(ev.pz.s!=='idle')add('pizza','Pizza by drone',pzd.position.x,pzd.position.y-.5,pzd.position.z,10,2.8,pzd);
+    if(heliRef.s!=='wait')add('heli','The helicopter on the sky deck',HPX,DY2+1,HPZ,14,heliRef.s==='parked'?1.5:3);if(booth.on)add('podcast','Recording the podcast',29.4,3.4,-2.95,7,2.2);add('sky','The sky lounge',27.8,DY2+.6,-4,12,.7);
     if(guard.g.visible)add('guard','The night guard on patrol',guard.x,.6,guard.z,9,1.2,guard.g);
     if(roofMove>0)add('roof',roofGoal?'The roof rising for the rain':'The roof going back underground',15.5,3,4,36,3);add('upstairs','Upstairs',13,3.2,-4.6,20,.9);add('garden','The garden and fountain',9,.6,21,15,.7);add('parking','The parking',24.5,.5,20.7,16,.4);
     if(A.tia.walk&&A.tia.walk.kind==='film'&&A.tia.walk.wait>0)add('studio','Filming a reel',28.2,3.4,-5.8,9,2.4);
@@ -2153,7 +2252,7 @@ function init3D(){
   }
   function staffPos(id){const q=STAFF[id].p.g.position;return[q.x,q.z];}
   return {staffInfo,staffPos,emote,setQuality,quality:()=>QUALITY,fxOn:()=>fxOn,watch:watchSet,watchOn:()=>watch.on,watchEvent,weatherSet,occSet,weatherK:()=>wx,audioMix,retheme,focusTarget,
-    life,meeting,replied:()=>{replyT=0;},carsParked:()=>carsOn,onBreak:k=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind===k).map(a=>a.name),inCafe:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='table'||a.walk.kind==='coffee')).map(a=>a.name),inRoom:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind==='meeting').map(a=>a.name),
+    life,meeting,serverBlink:()=>{srvK=1.4;},inBooth:()=>booth.on,heliState:()=>heli.s,replied:()=>{replyT=0;},carsParked:()=>carsOn,onBreak:k=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind===k).map(a=>a.name),inCafe:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&(a.walk.kind==='table'||a.walk.kind==='coffee')).map(a=>a.name),inRoom:()=>agents.filter(a=>a.walk&&a.walk.wait>0&&a.walk.kind==='meeting').map(a=>a.name),
     setTod,todPhase,todAuto:b=>{todAuto=b;if(b)noonGoal=0;},noon:setNoon,night:()=>nightNow,drawScreens,ring,packet,confetti,cheer,ringBurst,setBeacon,snap,skipIntro:()=>{if(intro.on)endIntro();},introOn:()=>intro.on,fx:()=>fxOn};
 }
 function goHome(){view.tx=home.tx;view.ty=home.ty;view.tz=home.tz;view.dist=home.dist;view.pol=home.pol;}
@@ -2213,7 +2312,7 @@ function openPanel(kind,id){
   if(kind==='staff'){const T0={uzair:[THEME.cleaner,'Keeps the office clean','#2F8F8A'],barista:['Barista','Runs the café counter','#D9A93A'],recep:['Receptionist','Front desk and deliveries','#4B2E83'],cat:['Office cat','Unofficial head of morale','#E89A4A']}[id];
     head=`<div class="p-head"><span class="ava" style="background:${T0[2]}">${T0[0][0]}</span><div><h2>${T0[0]}</h2><p>${T0[1]}</p></div></div>`;}
   else if(kind==='agent'){const a=A[id];head=`<div class="p-head"><span class="ava" style="background:${T[a.team].color}">${a.name[0]}</span><div><h2>${a.name}</h2><p>${a.role}</p></div></div>`;}
-  else{const m={vault:['Lead Vault','Every business the scouts have found'],brain:['Shared Brain','What the whole team has learned so far'],meet:['Meetings booked','Calls on your calendar'],cafe:['Café','Where the team takes a break'],room:['Meeting room','Where booked calls get planned'],desk:['Reception','The front desk and the way in'],lounge:['Client lounge','Where clients see their new website'],chill:['Chill zone','Ping pong, beanbags and an arcade'],terrace:['Terrace','Pool, loungers and dinner under the lights'],dining:['Dining hall','Lunch for the whole team, upstairs'],gym:['Gym','Treadmills, weights and yoga mats'],studio:['Content studio','Where reels and client videos get made'],garden:['Garden','Fountain, flower beds and a bridge over the canal'],parking:['Parking','The team’s cars. Fewer at night']}[id];
+  else{const m={vault:['Lead Vault','Every business the scouts have found'],brain:['Shared Brain','What the whole team has learned so far'],meet:['Meetings booked','Calls on your calendar'],cafe:['Café','Where the team takes a break'],room:['Meeting room','Where booked calls get planned'],desk:['Reception','The front desk and the way in'],lounge:['Client lounge','Where clients see their new website'],chill:['Chill zone','Ping pong, beanbags and an arcade'],terrace:['Terrace','Pool, loungers and dinner under the lights'],dining:['Dining hall','Lunch for the whole team, upstairs'],gym:['Gym','Treadmills, weights and yoga mats'],studio:['Content studio','Where reels and client videos get made'],garden:['Garden','Fountain, flower beds and a bridge over the canal'],parking:['Parking','The team’s cars. Fewer at night'],sky:['Sky lounge and helipad','A glass-floored deck over the studio, with a bar and a helipad'],podcast:['Podcast booth','Where Riz and Lina record the Velorien podcast'],server:['Server room','The racks that send every email. They blink with each batch'],library:['Library','A quiet corner to read between tasks'],kids:['Kids’ corner','For clients who visit with their children']}[id];
     head=`<div class="p-head"><span class="ava" style="background:var(--accent);color:var(--accent-ink)">${m[0][0]}</span><div><h2>${m[0]}</h2><p>${m[1]}</p></div></div>`;}
   panel.innerHTML=`<button class="x" id="p-close" aria-label="Close panel">×</button>${head}<div id="p-dec"></div><div id="p-dyn"></div>${kind==='agent'?'<button id="p-pause" class="b2 wide"></button>':''}`;
   labelsEl.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));
@@ -2267,6 +2366,12 @@ function updatePanel(){
   }else if(sel.id==='studio'){const f=G&&G.onBreak('film').length;
     el.innerHTML=`<div class="stats"><div><b>${S.reels}</b><span>Reels made</span></div><div><b>${f?'Rolling':'Quiet'}</b><span>${f?A.tia.name+' is filming':'Camera ready'}</span></div></div>
       <p class="sec">Coming up</p><ul class="list">${meetings.slice(0,4).map(m=>`<li><span>Reel for ${m.biz}</span><span></span></li>`).join('')}</ul>`;
+  }else if(['sky','podcast','server','library','kids'].includes(sel.id)){const id=sel.id,hs=G?G.heliState():'wait',rd=G?G.onBreak('read'):[];
+    const C={sky:[[hs==='parked'?'Landed':hs==='wait'?'Clear':'Flying',"Helipad"],[4,'Guests on the deck']],podcast:[[G&&G.inBooth()?'On air':'Off air','Right now'],['Ep. '+(40+Math.floor(S.reels/3)),'Next episode']],
+      server:[[fmt(S.sent),'Emails sent'],['6','Racks']],library:[[rd.length,'Reading now'],['112','Books']],kids:[['1','Playing now'],['Blocks','Favourite toy']]}[id];
+    const L={sky:['A glass lift goes up from the studio','The helicopter lands now and then','The bar opens at sunset'],podcast:['Topics: websites, Google, social media','Recorded upstairs in the studio','Ask Riz or Lina to be a guest'],
+      server:['Bursts of light each time emails send','Cooled and backed up every night','Racks for mail, sites and the Shared Brain'],library:rd.length?rd:['Two armchairs and a reading lamp','Books on design, marketing and sales'],kids:['A foam mat, blocks and a teddy','A tiny table for drawing','Parents can watch from the sofa']}[id];
+    el.innerHTML=`<div class="stats">${C.map(x=>`<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div><ul class="list" style="margin-top:14px">${L.map(r=>`<li><span>${r}</span><span></span></li>`).join('')}</ul>`;
   }else if(sel.id==='garden'||sel.id==='parking'){const pk=sel.id==='parking',c=G?G.carsParked():0;
     el.innerHTML=`<div class="stats"><div><b>${pk?c:'On'}</b><span>${pk?'Cars parked':'Fountain'}</span></div><div><b>${pk?10-c:3}</b><span>${pk?'Free spaces':'Benches'}</span></div></div>
       <p class="sec">${pk?'Who drove in':'Around the garden'}</p><ul class="list">${pk?`<li><span>At the office now</span><span>${agents.filter(a=>!a.home).length}</span></li><li><span>Gone home</span><span>${agents.filter(a=>a.home).length}</span></li>`:'<li><span>Flower beds by the canal</span><span></span></li><li><span>A wooden bridge to the gazebo</span><span></span></li><li><span>The front gate, lit at night</span><span></span></li>'}</ul>`;
@@ -2357,7 +2462,7 @@ function flow(a,notable){
   if(!G||!chance(.6))return;
   const x=a.x+.18,y=1.25+(a.team==='marketing'?F2:0),z=a.y-.6,c=T[a.team].color;
   if(a.team==='marketing'){if(a.kind==='ads'&&notable)G.packet(x,y,z,OBJ.vault.x,1.3,OBJ.vault.y,c,2);else if(a.kind==='social'&&chance(.6))G.packet(x,y,z,x+3,12,z-6,c,1.5);return;}
-  if(a.team==='sender'){G.packet(x,y,z,x+7,10,z-15,c,1.5);return;}                 // email leaves the island
+  if(a.team==='sender'){if(G.serverBlink)G.serverBlink();G.packet(x,y,z,x+7,10,z-15,c,1.5);return;}                 // email leaves the island
   if(a.kind==='sort'){if(notable)G.packet(x-9,10,z+13,x,y,z,c,1.5);return;}        // a reply flies in
   if(a.team==='booker'){if(notable)G.packet(x,y,z,OBJ.meet.x,1.1,OBJ.meet.y,c,1.4);return;}
   if(a.team==='director'){G.packet(x,y,z,OBJ.brain.x,1.1,OBJ.brain.y,c,1.2);return;}
@@ -2424,6 +2529,8 @@ const TOUR=[
   {t:'Chill zone and terrace',p:'Ping pong, beanbags and an arcade inside, and a pool and loungers on the terrace outside.',at:[26.5,.5,11],d:17},
   {t:'Upstairs: dining hall and gym',p:'The whole team eats lunch together upstairs, and works out in the gym next door.',at:[8,3.2,-4.6],d:17},
   {t:'Content studio',p:'Tia films reels and client videos in front of the lights.',at:[28.2,3.3,-5.6],d:12},
+  {t:'Sky lounge and helipad',p:'A glass-floored deck above the studio, with a bar, a glass lift and a helipad where the helicopter lands now and then.',at:[28.2,6.6,-5],d:16},
+  {t:'Podcast, library and server room',p:'Riz and Lina record in the booth, agents read in the library upstairs, and the server room downstairs flashes every time emails go out.',at:[22,2.4,-3],d:20},
   {t:'Garden and parking',p:'The front gate, the driveway, the team’s cars and a fountain garden by the canal.',at:[16,.5,21],d:22},
   {t:'The hidden roof',p:'It lives underground. When rain starts, it rises out of the floor and glass slides across the top, over the café, meeting room, reception and pool too. When the rain stops, it hides again.',at:[15.5,3,5],d:38},
   {t:'Built by {brand}',p:'The billboard on the ridge shows off {brand}.',at:[8.5,7.2,-8.4],d:22}

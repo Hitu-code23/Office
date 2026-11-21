@@ -619,7 +619,7 @@ const AG=[
   ['lina','Lina','marketing','seo','Gets clients found on Google',21,-5.2],
   ['yash','Yash','marketing','ads','Runs Google and Meta ads',23,-5.2],
   ['tia','Tia','marketing','reel','Films and edits reels',27.2,-2.4],
-  ['mehria','Mehria','lead','lead','Team Lead: checks replies, bookings and call preps for every team, 3 times a day, and reports to Harsh',16.1,8.2]
+  ['rovin','Rovin','lead','lead','Team Lead: checks replies, bookings and call preps for every team, 3 times a day, and reports to Harsh',16.1,8.2]
 ];
 const A={}, agents=AG.map((r,i)=>{
   const a={id:r[0],name:r[1],team:r[2],kind:r[3],role:r[4],x:r[5],y:r[6],done:180+rnd(900),rate:82+rnd(16),
@@ -3539,7 +3539,7 @@ if(LIVE.on){
     const t=TEAMS[a.team]||{total:0,today:0,hours:Array(12).fill(0)};
     return `<div class="stats"><div><b>${fmt(t.total)}</b><span>${a.team==='lead'?'Team checks, all time':TN[a.team]+' team tasks, all time'}</span></div><div><b>${fmt(t.today)}</b><span>Done today</span></div></div>
       <div class="spark"><p>${a.team==='lead'?'Team Lead':TN[a.team]+' team'}, last 12 hours</p>${spark(t.hours)}</div>
-      <p class="sec">Latest real work (${a.team==='lead'?'Mehria':'team'})</p><ul class="list">${(TEAMLOG[a.team]||[]).map(l=>`<li><span>${l.msg}</span><span>${l.t}</span></li>`).join('')||'<li><span>Nothing yet</span><span></span></li>'}</ul>`;};
+      <p class="sec">Latest real work (${a.team==='lead'?a.name:'team'})</p><ul class="list">${(TEAMLOG[a.team]||[]).map(l=>`<li><span>${l.msg}</span><span>${l.t}</span></li>`).join('')||'<li><span>Nothing yet</span><span></span></li>'}</ul>`;};
   const TEAM={found:'scout',researched:'research',drafted:'writer',approved:'director',sent:'sender',replied:'reply',booked:'booker',won:'director',lost:'reply',skipped:'research',opened:'reply',checked:'design',teamcheck:'lead'};
   const TXT={found:l=>'Found a new lead: '+l,researched:l=>'Checked '+l,drafted:l=>'Wrote a message for '+l,approved:l=>'Approved the message for '+l,sent:l=>'Message sent to '+l,replied:l=>l+' replied',
     booked:l=>'Booked a call with '+l,won:l=>l+' became a client',lost:l=>l+' said no for now',skipped:l=>'Skipped '+l,opened:l=>'A lead opened their preview: '+l,checked:l=>'Checked the website of '+l,teamcheck:l=>l};
